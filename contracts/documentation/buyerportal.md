@@ -70,7 +70,7 @@ This page displays all the carbon credit tokens the user currently owns across a
 
 *   **Fetching the User's Portfolio:**
     *   There is no single function to get this. The frontend must build the portfolio list with the following logic:
-        1.  Call `Factory.getActivePools()` to get an array of all active pools.
+        1.  Call `Factory.getAllPools()` to get an array of all pools.
         2.  For each `Pool` in the array, call `balanceOf(connectedUserAddress)` on its `CBX` contract (`pool.poolAddress`).
         3.  If the returned balance is greater than `0`, add this pool to a list that will be rendered on the portfolio page.
 *   **Populating Each Portfolio Card:**
