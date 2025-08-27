@@ -1,0 +1,9 @@
+[submodule "contracts/CBX/lib/forge-std"]
+	path = contracts/CBX/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "contracts/CBX/lib/openzeppelin-contracts"]
+	path = contracts/CBX/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "cleantest/lib/forge-std"]
+	path = cleantest/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
