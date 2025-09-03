@@ -60,13 +60,14 @@ contract NFTReceipt is ERC721 {
         _;
     }
 
-    constructor() ERC721("", "") { }
+    constructor() ERC721("CBX Carbon Retirement Receipt", "CBXR") { }
     function initialise(address _owner) public {// constructed by Factory only.
         _name = "CBX Carbon Retirement Receipt";
         _symbol = "CBXR";
         factory = msg.sender;
         owner = _owner;
         NFTID = 0;
+        bundleCounter = 0;
     }
 
     function mintWithOutIPFS(address retirer, address originalPool, uint256 value, uint256 purchaseDate) private {
@@ -90,7 +91,6 @@ contract NFTReceipt is ERC721 {
             totalTokensInBundle += retirements[i].tokens;
         }
         uint256 last = NFTID;
-        bundleCounter++;
         IFactory.Pool memory pool = IFactory(factory).getPool(msg.sender);
         awaitingReceipt memory AwaitingReceipt = awaitingReceipt({
             pendingRetirements: retirements,
@@ -101,18 +101,19 @@ contract NFTReceipt is ERC721 {
             pool: pool
         });
         awaitingReceipts[bundleCounter] = AwaitingReceipt;
+        bundleCounter++;
 
     }
     function getPendingBundles() external view returns (awaitingReceipt[] memory) {
         uint256 num = 0;
-        for (uint i = 0; i < bundleCounter + 1; i++) {
+        for (uint i = 0; i < bundleCounter; i++) {
             if (awaitingReceiptsHandled[i] == false) {
                 num++;
             }
         }
         uint256 index = 0;
         awaitingReceipt[] memory AwaitingReceipts = new awaitingReceipt[](num);
-        for (uint i = 0; i < bundleCounter + 1; i++) {
+        for (uint i = 0; i < bundleCounter; i++) {
             if (awaitingReceiptsHandled[i] == false) {
             AwaitingReceipts[index] = awaitingReceipts[i];
             index++;
@@ -122,12 +123,18 @@ contract NFTReceipt is ERC721 {
 
     }
 
+    function getAwaitingReceipt(uint256 bundleId) external view returns (awaitingReceipt memory) {
+        return awaitingReceipts[bundleId];
+    }
+
     function validateReceipts(uint256 bundle, string memory IPFS) public onlyOwner {
+        require(!awaitingReceiptsHandled[bundle], "Bundle has already been handled");
         awaitingReceipt memory AwaitingReceipt = awaitingReceipts[bundle];
-        for (uint256 i = AwaitingReceipt.firstNFTID; i < AwaitingReceipt.lastNFTID; i++) {
+        for (uint256 i = AwaitingReceipt.firstNFTID; i < AwaitingReceipt.lastNFTID + 1; i++) {
            isRetired[i] = true; 
            IPFSHash[i] = IPFS;
         }
+        require(AwaitingReceipt.firstNFTID != 0, "Bundle does not exist");
         awaitingReceiptsHandled[bundle] = true; 
     }
     /* EXAMPLE JSON I FOUND ON STACK EXCHANGE:
@@ -148,6 +155,7 @@ contract NFTReceipt is ERC721 {
     */
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        ownerOf(tokenId);
         RetirementReceipt memory receipt = receipts[tokenId];
         string memory IPFS = IPFSHash[tokenId];
         string memory json = string(
@@ -168,7 +176,7 @@ contract NFTReceipt is ERC721 {
                 Strings.toString(receipt.purchaseDate),
                 "}",
                 ', {"trait_type": "has receipt", "value":',
-                isRetired[tokenId],
+                isRetired[tokenId] ? "true" : "false",
                 "}",
                 ', {"trait_type": "Receival Date", "value":',
                 Strings.toString(receipt.receivalDate),

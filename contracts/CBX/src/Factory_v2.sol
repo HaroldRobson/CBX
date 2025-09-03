@@ -29,6 +29,7 @@ contract Factory {
     event poolActivated(address Address, address Seller, string IPFS, uint256 initialSupply);
     event poolDeactivated(address Address, address Seller, string IPFS, bool refundRequired, uint256 registry); // a pool can be deactivated either because the seller withdraws credits (true),
         //or because all credits are sold (false).
+    event PoolDeclined(address indexed poolAddress, address indexed seller, uint256 depositRefunded);
     event refundSeller(address Address, address Seller, string IPFS, uint256 refundAmount, uint256 registry);
     // may as well have 0 = VERRA, 1 = GOLDSTANDARD, 2 = ETC..... Not having a fixed enum gives us flexibility for the future.
 
@@ -84,6 +85,10 @@ contract Factory {
 
     function changePoolCreationDeposit(uint256 _poolCreationDeposit) external onlyOwner {
         poolCreationDeposit = _poolCreationDeposit;
+    }
+
+    receive() external payable {
+
     }
 
     constructor(uint256 _fee, uint256 _poolCreationDeposit) {
@@ -157,6 +162,36 @@ contract Factory {
         ICBX PoolContract = ICBX(poolAddress);
         PoolContract.activate();
         isActive[poolAddress] = true;
+    }
+
+    function declinePool(address poolAddress) external onlyOwner {
+        Pool storage poolToDecline = addressToPool[poolAddress];
+        require(poolToDecline.seller != address(0), "Pool does not exist");
+        require(
+            addressToPool[poolAddress].status == PoolStatus.PENDING_APPROVAL,
+            "pool status must be PENDING_APPROVAL first"
+        );
+        address sellerAddress = poolToDecline.seller;
+        uint256 depositAmount = poolToDecline.deposit;
+        if (pools.length > 1) {
+            for (uint256 i = 0; i < pools.length; i++) {
+                if (pools[i] == poolAddress) {
+                    pools[i] = pools[pools.length - 1]; // Move the last element to the current index
+                    pools.pop(); // Remove the last element
+                    break; // Exit the loop
+                }
+            }
+        } else {
+            delete pools[0];
+        }
+        counter--;
+        delete addressToPool[poolAddress];
+        bytes memory poolsAsBytes = abi.encode(pools);
+        emit PoolDeclined(poolAddress, sellerAddress, depositAmount);
+        emit poolsChanged(poolsAsBytes);
+        (bool success,) = sellerAddress.call{value: depositAmount}(""); // return deposit
+        require(success, "deposit refund failed");
+ 
     }
 
     function deActivatePool(bool shouldRefund, uint256 refundAmount) external {

@@ -1,10 +1,11 @@
+
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
-import "../src/Factory2.sol";
-import "../src/CBX2.sol";
+import "../src/Factory_v2.sol";
+import "../src/CBX_v2.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DAppHelperTestSuite is Test {
@@ -14,16 +15,16 @@ contract DAppHelperTestSuite is Test {
     // This setup is identical to your provided file for consistency.
     Factory public factory;
     CBX public cbxPool1;
-    IERC20 public usdc = IERC20(0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359);
 
+    IERC20 public usdc = IERC20(0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582);
     // Actors
     address public owner = makeAddr("owner");
     address public seller = makeAddr("seller");
     address public seller2 = makeAddr("seller2");
     address public user1 = makeAddr("user1");
     address public user2 = makeAddr("user2");
-    address public usdcWhale = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
 
+    address public usdcWhale = 0x26c84e7640DcC7A3DCa2abA5e6e0a56Bef5a2f7C;
     // Constants
     uint256 constant PLATFORM_FEE_BPS = 300; // 3%
     uint256 constant POOL_DEPOSIT = 1 ether;
@@ -35,7 +36,7 @@ contract DAppHelperTestSuite is Test {
     // ===================== SETUP =========================
     //=======================================================
     function setUp() public {
-        vm.createSelectFork(vm.rpcUrl("polygon"), 63_000_000);
+        vm.createSelectFork(vm.rpcUrl("amoy"));
 
         // Deal ETH to all actors
         vm.deal(owner, 10 ether);

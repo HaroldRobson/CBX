@@ -1,16 +1,17 @@
+
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../src/Factory2.sol";
-import "../src/CBX2.sol";
+import "../src/Factory_v2.sol";
+import "../src/CBX_v2.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract CarbonForkTest is Test {
     // ======== Contracts & Interfaces ========
     Factory public factory;
     CBX public cbxPool;
-    IERC20 public usdc = IERC20(0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359);
+    IERC20 public usdc = IERC20(0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582);
 
     // ======== Realistic Actors (not blacklisted addresses) ========
     address public owner = address(0xA11CE); // Realistic looking address
@@ -19,10 +20,10 @@ contract CarbonForkTest is Test {
     address public user2 = address(0xDECAF); // Realistic looking address
 
     // ======== Working whale addresses ========
-    address public usdcWhale1 = 0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf;
-    address public usdcWhale2 = 0x1a13F4Ca1d028320A707D99520AbFefca3998b7F;
-    address public usdcWhale3 = 0x28C6c06298d514Db089934071355E5743bf21d60;
 
+    address public usdcWhale3 = 0x26c84e7640DcC7A3DCa2abA5e6e0a56Bef5a2f7C;
+    address public usdcWhale2 = 0x26c84e7640DcC7A3DCa2abA5e6e0a56Bef5a2f7C;
+    address public usdcWhale1 = 0x26c84e7640DcC7A3DCa2abA5e6e0a56Bef5a2f7C;
     // ======== Constants ========
     uint256 constant PLATFORM_FEE_BPS = 300; // 3%
     uint256 constant POOL_DEPOSIT = 1 ether;
@@ -31,7 +32,7 @@ contract CarbonForkTest is Test {
 
     function setUp() public {
         // Use a recent block
-        vm.createSelectFork(vm.rpcUrl("polygon"), 63000000);
+        vm.createSelectFork(vm.rpcUrl("amoy"));
 
         // Give ETH for gas to all addresses
         vm.deal(owner, 10 ether);
