@@ -39,9 +39,8 @@ contract ComprehensiveCarbonTest is Test {
         vm.prank(owner);
         factory = new Factory(PLATFORM_FEE_BPS, POOL_DEPOSIT);
         vm.prank(seller);
-        address newPoolAddress = factory.createPool{value: POOL_DEPOSIT}(
-            "ipfs://pool1", PRICE_PER_TOKEN, INITIAL_SUPPLY, seller, "POOL1", 0
-        );
+        address newPoolAddress =
+            factory.createPool{value: POOL_DEPOSIT}("ipfs://pool1", PRICE_PER_TOKEN, INITIAL_SUPPLY, seller, "POOL1", 0);
         vm.stopPrank();
         cbxPool1 = CBX(newPoolAddress);
         vm.prank(owner);
@@ -55,7 +54,7 @@ contract ComprehensiveCarbonTest is Test {
     function test_Withdrawals_OwnerAndSeller() public {
         uint256 tokensToBuy = 5000;
         uint256 totalCost = tokensToBuy * cbxPool1.getUSDCPricePerTokenWithFee();
-        
+
         // --- FIX: Use startPrank for multiple calls ---
         vm.startPrank(user1);
         usdc.approve(address(cbxPool1), totalCost);
@@ -91,14 +90,14 @@ contract ComprehensiveCarbonTest is Test {
         vm.prank(seller);
         cbxPool1.closePool();
         Factory.Pool memory pool = factory.getPool(address(cbxPool1));
-        assertEq(uint(pool.status), uint(Factory.PoolStatus.INACTIVE));
+        assertEq(uint256(pool.status), uint256(Factory.PoolStatus.INACTIVE));
         assertFalse(factory.checkActive(address(cbxPool1)));
         assertApproxEqAbs(seller.balance, sellerInitialETH + POOL_DEPOSIT, 1e16);
     }
-    
+
     function test_PoolClosing_Automatic_OnSellOut() public {
         uint256 sellerInitialETH = seller.balance;
-        
+
         // --- FIX: Use startPrank for multiple calls ---
         vm.startPrank(user1);
         usdc.approve(address(cbxPool1), type(uint256).max);
@@ -106,7 +105,7 @@ contract ComprehensiveCarbonTest is Test {
         vm.stopPrank();
 
         Factory.Pool memory pool = factory.getPool(address(cbxPool1));
-        assertEq(uint(pool.status), uint(Factory.PoolStatus.INACTIVE));
+        assertEq(uint256(pool.status), uint256(Factory.PoolStatus.INACTIVE));
         assertFalse(factory.checkActive(address(cbxPool1)));
         assertApproxEqAbs(seller.balance, sellerInitialETH + POOL_DEPOSIT, 1e16);
     }
@@ -117,20 +116,17 @@ contract ComprehensiveCarbonTest is Test {
         vm.prank(owner);
         cbxPool1.closepool();
         Factory.Pool memory pool = factory.getPool(address(cbxPool1));
-        assertEq(uint(pool.status), uint(Factory.PoolStatus.INACTIVE));
+        assertEq(uint256(pool.status), uint256(Factory.PoolStatus.INACTIVE));
         assertApproxEqAbs(seller.balance, sellerInitialETH + POOL_DEPOSIT, 1e16);
     }
 
     function test_Factory_PoolManagement_And_Getters() public {
         vm.prank(seller);
-        factory.createPool{value: POOL_DEPOSIT}(
-            "ipfs://pool2", PRICE_PER_TOKEN, 5000, seller, "POOL2", 1
-        );
+        factory.createPool{value: POOL_DEPOSIT}("ipfs://pool2", PRICE_PER_TOKEN, 5000, seller, "POOL2", 1);
         vm.stopPrank();
         vm.prank(seller2);
-        address pool3Addr = factory.createPool{value: POOL_DEPOSIT}(
-            "ipfs://pool3", PRICE_PER_TOKEN, 8000, seller2, "POOL3", 0
-        );
+        address pool3Addr =
+            factory.createPool{value: POOL_DEPOSIT}("ipfs://pool3", PRICE_PER_TOKEN, 8000, seller2, "POOL3", 0);
         vm.stopPrank();
         vm.prank(owner);
         factory.activatePool(pool3Addr);
@@ -139,12 +135,14 @@ contract ComprehensiveCarbonTest is Test {
         assertEq(allPools.length, 3);
         Factory.Pool[] memory activePools = factory.getActivePools();
         assertEq(activePools.length, 2);
-        bool foundPool1; bool foundPool3;
-        for(uint i; i < activePools.length; i++){
+        bool foundPool1;
+        bool foundPool3;
+        for (uint256 i; i < activePools.length; i++) {
             if (activePools[i].poolAddress == address(cbxPool1)) foundPool1 = true;
             if (activePools[i].poolAddress == pool3Addr) foundPool3 = true;
         }
-        assertTrue(foundPool1); assertTrue(foundPool3);
+        assertTrue(foundPool1);
+        assertTrue(foundPool3);
         Factory.Pool[] memory seller1Pools = factory.getSellersPools(seller);
         assertEq(seller1Pools.length, 2);
         Factory.Pool[] memory seller2Pools = factory.getSellersPools(seller2);
@@ -152,4 +150,3 @@ contract ComprehensiveCarbonTest is Test {
         assertEq(seller2Pools[0].poolAddress, pool3Addr);
     }
 }
-

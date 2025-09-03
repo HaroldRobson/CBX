@@ -15,7 +15,7 @@ contract DAppHelperTestSuite is Test {
     Factory public factory;
     CBX public cbxPool1;
     IERC20 public usdc = IERC20(0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359);
-    
+
     // Actors
     address public owner = makeAddr("owner");
     address public seller = makeAddr("seller");
@@ -57,11 +57,10 @@ contract DAppHelperTestSuite is Test {
 
         // Create and activate the main pool for testing
         vm.prank(seller);
-        address newPoolAddress = factory.createPool{value: POOL_DEPOSIT}(
-            "ipfs://pool1", PRICE_PER_TOKEN, INITIAL_SUPPLY, seller, "POOL1", 0
-        );
+        address newPoolAddress =
+            factory.createPool{value: POOL_DEPOSIT}("ipfs://pool1", PRICE_PER_TOKEN, INITIAL_SUPPLY, seller, "POOL1", 0);
         cbxPool1 = CBX(newPoolAddress);
-        
+
         vm.prank(owner);
         factory.activatePool(newPoolAddress);
     }
@@ -93,12 +92,14 @@ contract DAppHelperTestSuite is Test {
         // --- Assertions ---
         assertEq(usdc.balanceOf(user1), initialUserUSDC - costInUSDC, "User's USDC should decrease by the cost");
         assertEq(cbxPool1.getReserves(), initialPoolSupply - tokensToRetire, "Pool reserves should decrease");
-        assertEq(cbxPool1.totalSupply(), initialTotalSupply - tokensToRetire, "Total supply should decrease due to burn");
+        assertEq(
+            cbxPool1.totalSupply(), initialTotalSupply - tokensToRetire, "Total supply should decrease due to burn"
+        );
         assertEq(owner.balance, initialOwnerETH + RETIREMENT_FEE, "Owner should receive the retirement fee");
         assertEq(cbxPool1.getPendingCount(), initialQueueCount + 1, "Retirement queue count should increase by 1");
-        
+
         // Verify the new queue item is correct
-        (uint256 tokens, address user, ) = cbxPool1.pendingRetirementQueue(initialQueueCount);
+        (uint256 tokens, address user,) = cbxPool1.pendingRetirementQueue(initialQueueCount);
         assertEq(tokens, tokensToRetire, "Queue item should have the correct token amount");
         assertEq(user, user1, "Queue item should belong to the correct user");
 
@@ -125,15 +126,19 @@ contract DAppHelperTestSuite is Test {
         assertEq(summaryUser1.name, "POOL1");
         assertEq(summaryUser1.remainingSupply, INITIAL_SUPPLY - tokensToBuy);
         assertEq(summaryUser1.pricePerToken, PRICE_PER_TOKEN);
-        assertEq(uint(summaryUser1.status), uint(CBX.PoolStatus.ACTIVE));
+        assertEq(uint256(summaryUser1.status), uint256(CBX.PoolStatus.ACTIVE));
         assertEq(summaryUser1.seller, seller);
         assertEq(summaryUser1.userBalance, tokensToBuy, "Summary should show user1's correct balance");
 
         // --- Get summary for user2 (who has no balance) ---
         CBX.PoolSummary memory summaryUser2 = cbxPool1.getPoolSummary(user2);
-        
+
         // --- Assertions for user2's summary ---
-        assertEq(summaryUser2.remainingSupply, INITIAL_SUPPLY - tokensToBuy, "Remaining supply should be the same for all users");
+        assertEq(
+            summaryUser2.remainingSupply,
+            INITIAL_SUPPLY - tokensToBuy,
+            "Remaining supply should be the same for all users"
+        );
         assertEq(summaryUser2.userBalance, 0, "Summary should show user2's balance as 0");
     }
 
@@ -147,15 +152,20 @@ contract DAppHelperTestSuite is Test {
 
         // --- Create a new pool but DO NOT activate it ---
         vm.prank(seller2);
-        address pendingPoolAddr = factory.createPool{value: POOL_DEPOSIT}(
-            "ipfs://pending", PRICE_PER_TOKEN, 5000, seller2, "PENDING", 1
-        );
-        
+        address pendingPoolAddr =
+            factory.createPool{value: POOL_DEPOSIT}("ipfs://pending", PRICE_PER_TOKEN, 5000, seller2, "PENDING", 1);
+
         // --- Check again: there should be one pending pool ---
         Factory.Pool[] memory pendingPoolsAfterCreation = factory.getPendingPools();
         assertEq(pendingPoolsAfterCreation.length, 1, "There should be one pending pool after creation");
-        assertEq(pendingPoolsAfterCreation[0].poolAddress, pendingPoolAddr, "The address of the pending pool is incorrect");
-        assertEq(uint(pendingPoolsAfterCreation[0].status), uint(Factory.PoolStatus.PENDING_APPROVAL), "Pool status should be PENDING_APPROVAL");
+        assertEq(
+            pendingPoolsAfterCreation[0].poolAddress, pendingPoolAddr, "The address of the pending pool is incorrect"
+        );
+        assertEq(
+            uint256(pendingPoolsAfterCreation[0].status),
+            uint256(Factory.PoolStatus.PENDING_APPROVAL),
+            "Pool status should be PENDING_APPROVAL"
+        );
 
         // --- Activate the pending pool ---
         vm.prank(owner);

@@ -1,16 +1,15 @@
 pragma solidity ^0.8.0;
-
+import "./IFactory.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
-
-interface IFactory {
-    function deActivatePool(bool shouldRefund, uint256 refundAmount) external;
+interface INFTReceipts {
+    function sendReceipts(bytes memory retirementBundle) external;
 }
-
 contract CBX is ERC20 {
     address public owner;
     address public seller;
+    address public NFTContractAddress;
     uint256 public pricePerToken; // IN 10^6 of a USD!!
     address public factory;
     address USDC;
@@ -19,6 +18,9 @@ contract CBX is ERC20 {
     uint256 public sellerProfit;
     uint256 public feesCollected;
     uint256 public constant MAX_PENDING_RETIREMENTS = 2000;
+    bool private _initialised;
+    string private _name;
+    string private _symbol;
 
     enum PoolStatus {
         PENDING_APPROVAL,
@@ -69,19 +71,35 @@ contract CBX is ERC20 {
         require(msg.sender == factory);
         _;
     }
+    constructor() ERC20("", "") {
+    } // moved to initialise becasue of create2
+    
+    function name() public view override returns (string memory) { 
+        return _name;
+    }
 
-    constructor(
+    function symbol() public view override returns (string memory) { 
+        return _symbol;
+    }
+
+    function initialise(
         uint256 _fee,
         uint256 amountOfTokens, // 1 token = 0.01 carbon credits
         uint256 _pricePerToken, // in usdc with 1e6 at the end. EG 5 USD per credit = 5e6 per Credit = 5e4 per token.
         address Owner,
         address Seller,
         string memory Name,
-        uint256 index
-    ) ERC20(Name, string(abi.encodePacked("CBX", Strings.toString(index)))) {
+        uint256 index,
+        address _NFTContractAddress
+    ) external {
+        factory = msg.sender;
+        NFTContractAddress = _NFTContractAddress;
+        // _setNameSymbol(Name, string(abi.encodePacked("CBX", Strings.toString(index))));
+        _name = Name;
+        _symbol = string(abi.encodePacked("CBX", Strings.toString(index)));
         owner = Owner;
         seller = Seller;
-        USDC = 0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359; // change depending on chain.
+        USDC = 0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582; // polygon Amoy testnet
         fee = _fee;
         USDCtokens = IERC20(USDC);
         require(_pricePerToken > 1e4, "This price seems too low - check your decimals"); // Charge at least 1 dollar per carbon credit
@@ -93,7 +111,6 @@ contract CBX is ERC20 {
         feesCollected = 0;
         RETIREMET_GAS_FEE = 0.05 ether;
         status = PoolStatus.PENDING_APPROVAL;
-        factory = msg.sender;
     }
 
     function activate() external onlyFactory {
@@ -322,6 +339,8 @@ contract CBX is ERC20 {
         bundleCounter++;
         bytes memory retirementData = abi.encode(retirementBundle);
         emit RetirementBundle(bundleCounter, retirementTotal, retirementData, address(this)); // retirementTotal should be divisible by 100
+        INFTReceipts NFTReceipts = INFTReceipts(NFTContractAddress);
+        NFTReceipts.sendReceipts(retirementData); // auto send a pending receipt.
         delete retirementBundle;
         for (uint256 i = 0; i < pendingRetirementQueue.length - indexToSplit; i++) {
             pendingRetirementQueue[i] = pendingRetirementQueue[i + indexToSplit]; // shift entire queue forward.

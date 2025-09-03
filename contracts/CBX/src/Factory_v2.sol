@@ -1,10 +1,26 @@
-import "./CBX2.sol";
+
+import "./CBX_v2.sol";
+import "./NFT_v2.sol";
 
 pragma solidity ^0.8.30;
 
 interface ICBX {
     function activate() external;
+    
+    function initialise(
+        uint256 _fee,
+        uint256 amountOfTokens, // 1 token = 0.01 carbon credits
+        uint256 _pricePerToken, // in usdc with 1e6 at the end. EG 5 USD per credit = 5e6 per Credit = 5e4 per token.
+        address Owner,
+        address Seller,
+        string memory Name,
+        uint256 index,
+        address NFTContractAddress) external;
 
+}
+
+interface INFTContract {
+    function initialise(address _owner) external;
 }
 
 contract Factory {
@@ -21,6 +37,7 @@ contract Factory {
     uint256 public poolCreationDeposit;
     address public owner;
     uint256 public retirementGasFee = 0.05 ether; // can change later
+    address public NFTContractAddress;
     /*
     Pools begin as PENDING_APPROVAL, then owner (us) approves them to make them ACTIVE, then the pools themselves become INACTIVE either because the seller requests a refund, or all credits are sold.
     */
@@ -74,6 +91,18 @@ contract Factory {
         owner = msg.sender;
         fee = _fee;
         poolCreationDeposit = _poolCreationDeposit; // with decimals ie 500 e18 NOT 500;
+        bytes memory bytecode = type(NFTReceipt).creationCode;
+        uint256 salt = counter;
+        address _NFTContractAddress;
+        assembly {
+          _NFTContractAddress := create2(0, add(bytecode, 0x20), mload(bytecode), salt)// counter is salt
+          if iszero(extcodesize(_NFTContractAddress)) {
+            revert(0, 0)
+          }
+        }
+        NFTContractAddress = _NFTContractAddress;
+        INFTContract(NFTContractAddress).initialise(owner);
+
     }
 
     function emitPoolsChanged() internal {
@@ -90,11 +119,20 @@ contract Factory {
         uint256 _registry
     ) external payable returns (address) {
         require(msg.value == poolCreationDeposit, "insufficient Deposit Amount");
-        CBX poolContract = new CBX(fee, _initialSupply, pricePerToken, owner, SellerAddress, serialNumber, counter); // need to pass in factory address too for activate() onlyFactory.
+        bytes memory bytecode = type(CBX).creationCode;
+        address poolAddress;
+        uint256 salt = counter;
+        assembly {
+          poolAddress := create2(0, add(bytecode, 0x20), mload(bytecode), salt)// counter is salt
+          if iszero(extcodesize(poolAddress)) {
+            revert(0, 0)
+          }
+        }
+        ICBX(poolAddress).initialise(fee, _initialSupply, pricePerToken, owner, SellerAddress, serialNumber, counter, NFTContractAddress);
         counter++;
         Pool memory pool = Pool({
             status: PoolStatus.PENDING_APPROVAL,
-            poolAddress: address(poolContract),
+            poolAddress: poolAddress,
             IPFS_URI: IPFS,
             seller: SellerAddress,
             pricePerToken: pricePerToken,
@@ -102,12 +140,12 @@ contract Factory {
             initialSupply: _initialSupply,
             registry: _registry
         });
-        addressToPool[address(poolContract)] = pool;
-        pools.push(address(poolContract));
+        addressToPool[poolAddress] = pool;
+        pools.push(poolAddress);
         bytes memory poolsAsBytes = abi.encode(pools);
         emit poolsChanged(poolsAsBytes);
-        emit newPendingPool(address(poolContract), SellerAddress, IPFS, _initialSupply, _registry);
-        return address(poolContract);
+        emit newPendingPool(poolAddress, SellerAddress, IPFS, _initialSupply, _registry);
+        return poolAddress;
     }
 
     function activatePool(address poolAddress) external onlyOwner {

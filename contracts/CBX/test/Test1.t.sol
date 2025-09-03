@@ -1,5 +1,3 @@
-
-
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
@@ -15,13 +13,13 @@ contract CarbonForkTest is Test {
     IERC20 public usdc = IERC20(0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359);
 
     // ======== Realistic Actors (not blacklisted addresses) ========
-    address public owner = address(0xA11CE);  // Realistic looking address
-    address public seller = address(0xB0B);   // Realistic looking address  
+    address public owner = address(0xA11CE); // Realistic looking address
+    address public seller = address(0xB0B); // Realistic looking address
     address public user1 = address(0xC0FFEE); // Realistic looking address
-    address public user2 = address(0xDECAF);  // Realistic looking address
+    address public user2 = address(0xDECAF); // Realistic looking address
 
     // ======== Working whale addresses ========
-    address public usdcWhale1 = 0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf; 
+    address public usdcWhale1 = 0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf;
     address public usdcWhale2 = 0x1a13F4Ca1d028320A707D99520AbFefca3998b7F;
     address public usdcWhale3 = 0x28C6c06298d514Db089934071355E5743bf21d60;
 
@@ -34,7 +32,7 @@ contract CarbonForkTest is Test {
     function setUp() public {
         // Use a recent block
         vm.createSelectFork(vm.rpcUrl("polygon"), 63000000);
-        
+
         // Give ETH for gas to all addresses
         vm.deal(owner, 10 ether);
         vm.deal(seller, 10 ether);
@@ -56,22 +54,22 @@ contract CarbonForkTest is Test {
             console.log("Used deal() method successfully");
         } catch {
             console.log("deal() failed, trying whale transfers...");
-            
+
             // Method 2: Try whale transfers
             address[3] memory whales = [usdcWhale1, usdcWhale2, usdcWhale3];
-            
-            for(uint i = 0; i < whales.length && !success; i++) {
+
+            for (uint256 i = 0; i < whales.length && !success; i++) {
                 uint256 whaleBalance = usdc.balanceOf(whales[i]);
                 console.log("Whale", i, "balance:", whaleBalance);
-                
-                if(whaleBalance >= amountToGive * 2) {
+
+                if (whaleBalance >= amountToGive * 2) {
                     vm.startPrank(whales[i]);
-                    
+
                     // Try to transfer to users
                     try usdc.transfer(user1, amountToGive) returns (bool result1) {
-                        if(result1) {
+                        if (result1) {
                             try usdc.transfer(user2, amountToGive) returns (bool result2) {
-                                if(result2) {
+                                if (result2) {
                                     success = true;
                                     console.log("Whale", i, "transfer successful");
                                 }
@@ -82,18 +80,18 @@ contract CarbonForkTest is Test {
                     } catch Error(string memory reason) {
                         console.log("Transfer to user1 failed:", reason);
                     }
-                    
+
                     vm.stopPrank();
                 }
             }
         }
 
         require(success, "Failed to get USDC using any method");
-        
+
         // Verify balances
         console.log("User1 USDC balance:", usdc.balanceOf(user1));
         console.log("User2 USDC balance:", usdc.balanceOf(user2));
-        
+
         require(usdc.balanceOf(user1) >= amountToGive, "User1 insufficient USDC");
         require(usdc.balanceOf(user2) >= amountToGive, "User2 insufficient USDC");
 
@@ -101,14 +99,8 @@ contract CarbonForkTest is Test {
         vm.startPrank(seller);
         string memory ipfs = "ipfs://somehash";
         string memory serial = "VERRA-123";
-        address newPoolAddress = factory.createPool{value: POOL_DEPOSIT}(
-            ipfs,
-            PRICE_PER_TOKEN,
-            INITIAL_SUPPLY,
-            seller,
-            serial,
-            0
-        );
+        address newPoolAddress =
+            factory.createPool{value: POOL_DEPOSIT}(ipfs, PRICE_PER_TOKEN, INITIAL_SUPPLY, seller, serial, 0);
         vm.stopPrank();
 
         cbxPool = CBX(newPoolAddress);
@@ -125,7 +117,7 @@ contract CarbonForkTest is Test {
         assertEq(factory.counter(), 1);
         assertTrue(factory.checkActive(address(cbxPool)));
         Factory.Pool memory pool = factory.getPool(address(cbxPool));
-        assertEq(uint(pool.status), uint(Factory.PoolStatus.ACTIVE));
+        assertEq(uint256(pool.status), uint256(Factory.PoolStatus.ACTIVE));
         assertEq(cbxPool.balanceOf(address(cbxPool)), INITIAL_SUPPLY);
     }
 
@@ -193,7 +185,7 @@ contract CarbonForkTest is Test {
         console.log("user2 address:", user2);
         console.log("seller address:", seller);
         console.log("owner address:", owner);
-        
+
         // These should now be realistic addresses that aren't blacklisted
     }
 }
