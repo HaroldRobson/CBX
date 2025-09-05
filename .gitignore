@@ -1,4 +1,5 @@
 # Logs
+.next
 logs
 *.log
 npm-debug.log*
@@ -23,3 +24,4 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.next
