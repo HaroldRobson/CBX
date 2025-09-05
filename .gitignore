@@ -1,5 +1,10 @@
-# Logs
+# Next.js
 .next
+
+# Next.js
+.next
+
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -24,4 +29,3 @@ dist-ssr
 *.sln
 *.sw?
 .env
-.next
