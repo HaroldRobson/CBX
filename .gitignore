@@ -1,8 +1,7 @@
-# Next.js
-.next
-
-# Next.js
-.next
+# Next.js build directories
+.next/
+*/\.next/
+**/.next/
 
 # Logs
 logs
