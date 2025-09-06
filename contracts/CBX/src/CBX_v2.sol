@@ -71,7 +71,7 @@ contract CBX is ERC20 {
         require(msg.sender == factory);
         _;
     }
-    constructor() ERC20("", "") {
+    constructor() ERC20("CBX", "this should change") {
     } // moved to initialise becasue of create2
     
     function name() public view override returns (string memory) { 
