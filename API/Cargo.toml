@@ -11,7 +11,7 @@ axum = "0.8.4"
 axum-macros = "0.5.0"
 dotenv = "0.15.0"
 hex = "0.4.3"
-lettre = "0.11.18"
+lettre = { version = "0.11.18", default-features = false, features = ["tokio1-rustls", "smtp-transport", "builder", "ring", "rustls-native-certs"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.143"
 sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio", "macros"] }

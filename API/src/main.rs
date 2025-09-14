@@ -28,10 +28,10 @@ mod handlers;
 mod utils;
 use crate::handlers::request_private_key;
 use crate::utils::email;
+use crate::utils::types::AppState;
 use crate::utils::types::*;
 use crate::utils::wallet::get_emails_wallet;
-
-use crate::utils::types::AppState;
+use tokio::sync::Mutex;
 #[derive(Serialize)]
 struct MyMessage {
     message: String,
@@ -169,7 +169,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route("/api/requestprivatekey", get(request_private_key))
         .with_state(Arc::new(AppState {
             db: pool.clone(),
-            mailer: mailer,
+            mailer: Mutex::new(mailer),
         }));
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     println!("listening on {:?}", addr);

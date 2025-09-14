@@ -10,7 +10,7 @@ use std::error::Error;
 use std::fs;
 use std::sync::Arc;
 
-pub async fn create_mailer() -> Result<SmtpTransport, Box<dyn Error>> {
+pub async fn create_mailer() -> Result<SmtpTransport, Box<dyn Error + Send + Sync>> {
     // pass into AppState in main
     let username = std::env::var("EMAIL_USERNAME")?;
     let password = std::env::var("EMAIL_PASSWORD")?;
@@ -25,11 +25,11 @@ pub async fn create_mailer() -> Result<SmtpTransport, Box<dyn Error>> {
 }
 
 pub async fn send_email_simple(
-    State(app_state): State<Arc<AppState>>,
+    app_state: &Arc<AppState>,
     content: &str,
     subject: &str,
     email: &str,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), Box<dyn Error + Send + Sync>> {
     let username = std::env::var("EMAIL_USERNAME")?;
     let email = Message::builder()
         .from(username.parse::<Mailbox>().unwrap())
@@ -37,8 +37,8 @@ pub async fn send_email_simple(
         .subject(subject)
         .body(content.to_string())?;
     println!("email composed");
-
-    match app_state.mailer.send(&email) {
+    let mut mailer = app_state.mailer.lock().await;
+    match mailer.send(&email) {
         Ok(_) => {
             println!("Basic email sent!");
             Ok(())
@@ -55,8 +55,8 @@ pub async fn send_email_html(
     recipient: &str,
     filename: &str,
     subject: &str,
-    State(app_state): State<Arc<AppState>>,
-) -> Result<(), Box<dyn Error>> {
+    app_state: &Arc<AppState>,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
     let html_template = fs::read_to_string(filename)?;
     let mut html_content = html_template;
 
@@ -77,7 +77,8 @@ pub async fn send_email_html(
         )?;
     println!("email composed");
 
-    match app_state.mailer.send(&email) {
+    let mut mailer = app_state.mailer.lock().await;
+    match mailer.send(&email) {
         Ok(_) => {
             println!("Basic email sent!");
             Ok(())

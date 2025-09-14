@@ -8,9 +8,10 @@ use sqlx::FromRow;
 use sqlx::postgres::PgPool;
 use std::convert::TryFrom;
 use std::error::Error;
+use tokio::sync::Mutex;
 pub struct AppState {
     pub db: PgPool,
-    pub mailer: SmtpTransport,
+    pub mailer: Mutex<SmtpTransport>,
 }
 
 #[derive(FromRow)]

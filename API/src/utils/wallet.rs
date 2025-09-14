@@ -32,8 +32,8 @@ fn create_new_wallet() -> Wallet {
 
 async fn create_new_wallet_and_insert(
     email: &str,
-    State(app_state): State<Arc<AppState>>,
-) -> Result<Wallet, Box<dyn Error>> {
+    app_state: &Arc<AppState>,
+) -> Result<Wallet, Box<dyn Error + Send + Sync>> {
     let wallet = create_new_wallet();
     let private_key_hex: String = format!("0x{}", hex::encode(wallet.signer.to_bytes()));
     let addr_string = wallet.addr.to_string();
@@ -55,15 +55,31 @@ async fn create_new_wallet_and_insert(
 }
 
 pub async fn get_emails_wallet(
-    State(app_state): State<Arc<AppState>>,
+    app_state: &Arc<AppState>,
     email: &str,
-) -> Result<Wallet, Box<dyn Error>> {
+) -> Result<Wallet, Box<dyn Error + Send + Sync>> {
     let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE email = $1")
         .bind(email)
         .fetch_optional(&app_state.db)
         .await?;
     match user {
-        Some(user) => user.to_wallet(),
-        None => create_new_wallet_and_insert(email, State(app_state)).await,
+        Some(user) => match user.to_wallet() {
+            Ok(wallet) => Ok(wallet),
+            Err(e) => Err(format!("Failed to convert user to wallet: {}", e).into()),
+        },
+        None => create_new_wallet_and_insert(email, &app_state).await,
+    }
+}
+
+pub async fn delete_wallet(
+    app_state: &Arc<AppState>,
+    email: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    match sqlx::query!("DELETE FROM users where email = $1", email.to_string())
+        .execute(&app_state.db)
+        .await
+    {
+        Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e)),
     }
 }
