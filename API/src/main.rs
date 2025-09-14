@@ -24,6 +24,14 @@ use sqlx::postgres::PgPoolOptions;
 
 use alloy::primitives::{Address, address};
 use alloy::signers::local::PrivateKeySigner;
+mod handlers;
+mod utils;
+use crate::handlers::request_private_key;
+use crate::utils::email;
+use crate::utils::types::*;
+use crate::utils::wallet::get_emails_wallet;
+
+use crate::utils::types::AppState;
 #[derive(Serialize)]
 struct MyMessage {
     message: String,
@@ -37,24 +45,20 @@ struct PurchaseRequest {
     pool_address: String,
 }
 
-pub struct AppState {
-    db: PgPool,
-}
-
 fn create_new_wallet(email: String) -> (PrivateKeySigner, Address) {
     let signer = PrivateKeySigner::random();
     let addr = signer.address();
     (signer, addr)
 }
 
-async fn MakePurchase(Json(payload): Json<PurchaseRequest>) -> impl IntoResponse {
+async fn make_purchase(Json(payload): Json<PurchaseRequest>) -> impl IntoResponse {
     println!("email {:?}, value {:?}", payload.email, payload.value_usd);
     let (signer, addr) = create_new_wallet("example_email@meow.com".to_string());
 
     let (key, addr) = create_new_wallet("example@email.com".to_string());
     let private_key_hex = format!("0x{}", hex::encode(key.to_bytes()));
     let addr_string = addr.to_string();
-    if let Err(error) = sendEmail(&private_key_hex, &addr_string, &payload.email).await {
+    if let Err(error) = send_email(&private_key_hex, &addr_string, &payload.email).await {
         println!("Failed {:?}", error);
     };
     (StatusCode::OK, "purchase_received".to_string())
@@ -70,14 +74,13 @@ async fn test2() -> Json<MyMessage> {
     Json(msg)
 }
 
-async fn create_Mailer() -> Result<SmtpTransport, Box<dyn Error>> {
+async fn create_mailer() -> Result<SmtpTransport, Box<dyn Error>> {
     let username = std::env::var("EMAIL_USERNAME")?;
     let password = std::env::var("EMAIL_PASSWORD")?;
 
     let creds = Credentials::new(username, password);
 
-    let mailer = SmtpTransport::starttls_relay("mail.privateemail.com")
-        .unwrap()
+    let mailer = SmtpTransport::starttls_relay("mail.privateemail.com")?
         .credentials(creds)
         .port(587)
         .build();
@@ -108,7 +111,7 @@ async fn create_user(
     }
 }
 
-async fn sendEmail(key: &str, addr: &str, email: &str) -> Result<(), Box<dyn Error>> {
+async fn send_email(key: &str, addr: &str, email: &str) -> Result<(), Box<dyn Error>> {
     let email = Message::builder()
         .from("info@cbx.earth".parse::<Mailbox>().unwrap())
         .to(email.parse::<Mailbox>().unwrap())
@@ -116,11 +119,10 @@ async fn sendEmail(key: &str, addr: &str, email: &str) -> Result<(), Box<dyn Err
         .body(format!(
             "Hello, this is a test email! \n privateKey: {:?},\n address: {:?}",
             key, addr
-        ))
-        .unwrap();
+        ))?;
     println!("email composed");
 
-    let mailer = match create_Mailer().await {
+    let mailer = match create_mailer().await {
         Ok(mailer) => mailer,
         Err(error) => {
             println!("failed to create mailer {:?}", error);
@@ -129,12 +131,15 @@ async fn sendEmail(key: &str, addr: &str, email: &str) -> Result<(), Box<dyn Err
     };
 
     match mailer.send(&email) {
-        Ok(_) => println!("Basic email sent!"),
+        Ok(_) => {
+            println!("Basic email sent!");
+            Ok(())
+        }
         Err(error) => {
             println!("Basic email failed to send. {:?}", error);
+            Err(Box::new(error))
         }
     }
-    Ok(())
 }
 
 #[tokio::main]
@@ -155,12 +160,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             std::process::exit(1);
         }
     };
+    let mailer = create_mailer().await?;
     let app = Router::new()
         .route("/api/test", get(test))
         .route("/api/test2", get(test2))
-        .route("/api/makepurchase", post(MakePurchase))
+        .route("/api/makepurchase", post(make_purchase))
         .route("/api/createuser", post(create_user))
-        .with_state(Arc::new(AppState { db: pool.clone() }));
+        .route("/api/requestprivatekey", get(request_private_key))
+        .with_state(Arc::new(AppState {
+            db: pool.clone(),
+            mailer: mailer,
+        }));
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     println!("listening on {:?}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await?;
