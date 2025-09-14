@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Wallet Information - CBX</title>
+    <title>Action Required: Your CBX Account Details</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Reset and Base Styles */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Helvetica', Arial, sans-serif; }
         
-        body {
-            font-family: 'Helvetica', Arial, sans-serif;
-            line-height: 1.6;
-            color: #0B1526;
+        /* Main Styles */
+        .body-wrapper {
             background-color: #f8fafa;
+            color: #0B1526;
         }
         
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: white;
+            background-color: #ffffff;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(11, 21, 38, 0.1);
@@ -29,130 +29,89 @@
         
         .header {
             background: linear-gradient(135deg, #0B1526 0%, #1a2b45 100%);
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
-            color: white;
         }
-        
-        .logo {
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-        
-        .logo-text {
-            font-size: 48px;
-            font-weight: 700;
-            letter-spacing: -2px;
-        }
-        
-        .logo-c, .logo-b {
-            color: white;
-        }
-        
-        .logo-x {
-            color: #00B36A;
-        }
-        
-        .accent-dots {
-            display: inline-block;
-            margin-left: 8px;
-            vertical-align: bottom;
-            margin-bottom: 8px;
-        }
-        
-        .dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background-color: #00B36A;
-            margin: 0 1px;
-            border-radius: 50%;
-        }
-        
-        .dot:nth-child(1) { opacity: 0.2; }
-        .dot:nth-child(2) { opacity: 0.4; }
-        .dot:nth-child(3) { opacity: 0.6; }
-        .dot:nth-child(4) { opacity: 0.8; }
-        .dot:nth-child(5) { opacity: 1.0; }
-        
+
         .header h1 {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 600;
+            margin-top: 20px;
             margin-bottom: 8px;
+            color: #ffffff;
         }
         
         .header p {
             font-size: 16px;
             opacity: 0.9;
+            color: #e2e8f0;
         }
         
         .content {
             padding: 40px 30px;
+            line-height: 1.6;
         }
         
-        .warning-box {
-            background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
-            border: 2px solid #fecaca;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-            position: relative;
-        }
-        
-        .warning-box::before {
-            content: "⚠️";
+        .section-title {
+            color: #0B1526;
             font-size: 20px;
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
         }
         
-        .warning-box h3 {
+        .primary-alert {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .primary-alert h3 {
             color: #dc2626;
             font-size: 18px;
-            margin-bottom: 10px;
-            margin-left: 35px;
-            font-weight: 600;
+            margin-bottom: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .primary-alert h3::before {
+            content: "⚠️";
+            font-size: 24px;
+            margin-right: 12px;
         }
         
-        .warning-box p {
+        .primary-alert p, .primary-alert li {
             color: #7f1d1d;
-            margin-left: 35px;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.7;
         }
         
-        .info-section {
-            background: linear-gradient(135deg, #f0fdf9 0%, #ecfdf5 100%);
-            border: 1px solid #00B36A;
+        .info-box {
+            background: #f0f9ff;
+            border-left: 5px solid #0ea5e9;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .info-box p {
+            color: #0c4a6e;
+            font-size: 15px;
+        }
+        
+        .wallet-details {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 25px;
             margin-bottom: 25px;
         }
         
-        .info-section h3 {
-            color: #00B36A;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .info-section h3::before {
-            content: "🔗";
-            margin-right: 8px;
-        }
-        
-        .wallet-info {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .wallet-info label {
+        .wallet-details label {
             display: block;
             font-weight: 600;
             color: #475569;
@@ -162,77 +121,38 @@
             letter-spacing: 0.5px;
         }
         
-        .wallet-address {
+        .wallet-display {
             background: white;
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            padding: 12px;
+            padding: 12px 15px;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             word-break: break-all;
             color: #374151;
-        }
-        
-        .private-key-section {
-            background: #fef3f2;
-            border: 3px solid #dc2626;
-            border-radius: 8px;
-            padding: 25px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .danger-header {
-            background: #dc2626;
-            color: white;
-            padding: 15px;
-            margin: -25px -25px 20px -25px;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-bottom: 20px;
         }
         
         .private-key-display {
-            background: white;
-            border: 2px solid #dc2626;
-            border-radius: 6px;
-            padding: 20px;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
             font-size: 12px;
-            word-break: break-all;
             color: #dc2626;
             font-weight: 600;
-            line-height: 1.4;
-        }
-        
-        .security-notice {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 15px;
-            color: #7f1d1d;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: left;
+            border-color: #fecaca;
         }
         
         .resources {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 25px;
-            margin-top: 25px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e2e8f0;
         }
-        
+
         .resources h3 {
             color: #0B1526;
             font-size: 18px;
             margin-bottom: 15px;
             font-weight: 600;
         }
-        
+
         .resource-link {
             display: inline-block;
             background: linear-gradient(135deg, #00B36A 0%, #059669 100%);
@@ -241,109 +161,80 @@
             padding: 12px 20px;
             border-radius: 6px;
             font-weight: 600;
-            margin: 5px 10px 5px 0;
+            margin: 5px 10px 10px 0;
+            font-size: 14px;
         }
         
         .footer {
             background: #f8fafc;
-            padding: 20px 30px;
+            padding: 30px;
             text-align: center;
             color: #64748b;
             font-size: 14px;
             border-top: 1px solid #e2e8f0;
         }
-        
-        .instructions {
-            background: #f0f9ff;
-            border-left: 4px solid #0ea5e9;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .instructions h4 {
-            color: #0c4a6e;
-            font-size: 16px;
+
+        .footer p {
             margin-bottom: 10px;
-            font-weight: 600;
-        }
-        
-        .instructions ul {
-            color: #0c4a6e;
-            margin-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            line-height: 1.5;
         }
     </style>
 </head>
-<body>
+<body class="body-wrapper">
     <div class="container">
         <div class="header">
-            <div class="logo">
-                <span class="logo-text">
-                    <span class="logo-c">C</span><span class="logo-b">B</span><span class="logo-x">X</span>
-                </span>
-                <div class="accent-dots">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-            </div>
-            <h1>Your Wallet Information</h1>
-            <p>Secure access to your Tezos wallet credentials</p>
+            <!-- 
+              THE FIX IS HERE: 
+              The src attribute now points to an external URL. 
+              You MUST upload your logo PNG to a public server and replace this placeholder link.
+            -->
+            <img src="https://i.imgur.com/your-logo-filename.png" alt="CBX Logo" width="150" style="display:block; margin:0 auto;">
+            <h1>Action Required: Account Deletion</h1>
+            <p>Please read the following information carefully.</p>
         </div>
         
         <div class="content">
-            <div class="warning-box">
-                <h3>Important Security Notice</h3>
-                <p><strong>DO NOT USE THIS WALLET ANYMORE.</strong> Immediately transfer all funds to a new, secure wallet. This private key may have been compromised and should be considered unsafe for future use.</p>
+            <h2 class="section-title">Important Notice Regarding Your Account</h2>
+            
+            <div class="primary-alert">
+                <h3>Your Account Has Been Deleted</h3>
+                <p>To comply with non-custodial regulations, we are legally required to give you full and sole control of your assets. As part of this process, **your account and wallet credentials have been permanently deleted from our database.**</p>
+                <p style="margin-top: 15px;">We no longer hold any information associated with your wallet. <strong>This email is the final and only record of your private key.</strong></p>
+            </div>
+
+            <div class="info-box">
+                <p><strong>It is now your sole responsibility to secure your assets.</strong> You must use the credentials below to access any funds (CBX, USDC, XTZ, etc.) you held in liquidity pools and transfer them to a new, secure wallet that you control.</p>
             </div>
             
-            <div class="info-section">
-                <h3>Your Tezos Wallet Details</h3>
-                <div class="wallet-info">
-                    <label>Wallet Address</label>
-                    <div class="wallet-address">[REPLACE_1]</div>
-                </div>
+            <div class="wallet-details">
+                <label>Your Tezos Wallet Address</label>
+                <div class="wallet-display">[REPLACE_1]</div>
+
+                <label style="color: #dc2626; margin-top: 20px;">Your Private Key (Handle with Extreme Care)</label>
+                <div class="wallet-display private-key-display">[REPLACE_0]</div>
             </div>
-            
-            <div class="private-key-section">
-                <div class="danger-header">
-                    ⚠️ SENSITIVE INFORMATION - HANDLE WITH EXTREME CARE ⚠️
-                </div>
-                <p style="margin-bottom: 15px; color: #7f1d1d; font-weight: 600;">Your Private Key:</p>
-                <div class="private-key-display">[REPLACE_0]</div>
-                <div class="security-notice">
-                    🛡️ <strong>SECURITY REMINDER:</strong> Anyone with this private key can access your funds. Never share it with anyone and delete this email after transferring your funds to a new wallet.
-                </div>
+
+            <div class="primary-alert">
+                <h3>Your Next Steps Are Critical</h3>
+                <ol style="margin-left: 20px; padding-left: 0;">
+                    <li style="margin-bottom: 10px;"><strong>Create a New Wallet:</strong> Use a trusted application like MetaMask, Kukai, or Temple to create a brand new, secure Tezos wallet.</li>
+                    <li style="margin-bottom: 10px;"><strong>Import This Wallet:</strong> Use the private key above to temporarily import this "old" wallet into your chosen application.</li>
+                    <li style="margin-bottom: 10px;"><strong>Transfer All Assets:</strong> Immediately transfer all tokens (CBX, USDC, XTZ) and withdraw any liquidity from pools associated with the address above to your new, secure wallet address.</li>
+                    <li style="margin-bottom: 10px;"><strong>Delete This Email:</strong> Once you have secured your funds, permanently delete this email to protect your private key.</li>
+                </ol>
             </div>
-            
-            <div class="instructions">
-                <h4>Next Steps - Transfer Your Funds Immediately:</h4>
-                <ul>
-                    <li>Create a new Tezos wallet using a secure wallet application</li>
-                    <li>Transfer ALL funds from the address above to your new wallet</li>
-                    <li>Never use the private key shown above again</li>
-                    <li>Delete this email after completing the transfer</li>
-                </ul>
-            </div>
-            
+
+            <!-- THE SECOND FIX: The resource links/buttons are back -->
             <div class="resources">
                 <h3>Helpful Resources</h3>
-                <p style="margin-bottom: 15px; color: #64748b;">Get started with MetaMask and add Tezos support:</p>
-                <a href="https://metamask.io/faqs/" class="resource-link">MetaMask Getting Started</a>
-                <a href="https://www.datawallet.com/crypto/add-tezos-to-metamask" class="resource-link">Tezos Wallet Guide</a>
+                <p style="margin-bottom: 15px; color: #64748b;">If you're new to self-custody, these guides can help:</p>
+                <a href="https://metamask.io/faqs/" class="resource-link" target="_blank">MetaMask Getting Started</a>
+                <a href="https://www.datawallet.com/crypto/add-tezos-to-metamask" class="resource-link" target="_blank">Tezos Wallet Guide</a>
             </div>
         </div>
         
         <div class="footer">
-            <p>This email contains sensitive financial information. Please handle with care and delete after use.</p>
-            <p style="margin-top: 10px; color: #94a3b8;">© CBX - Secure Wallet Services</p>
+            <p>This email contains your sole access to your financial assets. Please treat it with the highest level of security.</p>
+            <p style="color: #94a3b8;">© CBX - Empowering Your Financial Autonomy</p>
         </div>
     </div>
 </body>
