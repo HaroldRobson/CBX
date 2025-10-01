@@ -339,6 +339,8 @@ contract CBX is ERC20 {
         bundleCounter++;
         bytes memory retirementData = abi.encode(retirementBundle);
         emit RetirementBundle(bundleCounter, retirementTotal, retirementData, address(this)); // retirementTotal should be divisible by 100
+        // MAJOR ISSUE - bundleCounter should be a random 256 bit number, and not a deterministic one. This is to stop two bundles from different CBX contracts having the same bundle Id.
+//FIX THIS!!!!!!!!!
         INFTReceipts NFTReceipts = INFTReceipts(NFTContractAddress);
         NFTReceipts.sendReceipts(retirementData); // auto send a pending receipt.
         delete retirementBundle;
