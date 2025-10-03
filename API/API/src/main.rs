@@ -1,15 +1,6 @@
 use axum::Router;
-use axum::{
-    Json,
-    extract::State,
-    http::StatusCode,
-    response::{Html, IntoResponse},
-    routing::{get, post},
-};
-use hex;
 use lettre::{
-    Message, SmtpTransport, Transport,
-    message::{Attachment, Body, Mailbox, MultiPart, SinglePart, header::ContentType},
+    SmtpTransport,
     transport::smtp::authentication::Credentials,
 };
 use std::error::Error;
@@ -17,19 +8,15 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 mod factory_monitor;
 use crate::factory_monitor::monitor_factory;
-use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
 use sqlx::postgres::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use tokio::task::JoinSet;
 mod error_handling;
 use crate::error_handling::MonitorError;
-use alloy::primitives::{Address, address};
+use alloy::primitives::address;
 use alloy::providers::{Provider, ProviderBuilder, WsConnect};
-use alloy::signers::local::PrivateKeySigner;
-use tokio::sync::{Mutex, mpsc};
+use tokio::sync::Mutex;
 mod log_handling;
-use crate::log_handling::*;
 pub enum Registry {
     GoldStandard,
     Verra,
@@ -84,10 +71,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let provider = Arc::new(provider_unarced);
     let factory_addr = address!("1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
     // Spawn factory monitor
-    let (contract_spawner_tx, mut contract_spawner_rx) = tokio::sync::mpsc::channel(100);
-    let (error_monitoring_tx, mut error_monitoring_rx) =
+    let (contract_spawner_tx, contract_spawner_rx) = tokio::sync::mpsc::channel(100);
+    let (error_monitoring_tx, error_monitoring_rx) =
         tokio::sync::mpsc::channel::<MonitorError>(100);
-    let (log_handling_tx, mut log_handling_rx) =
+    let (log_handling_tx, log_handling_rx) =
         tokio::sync::mpsc::channel::<alloy::rpc::types::Log>(100); // use these for handle_logs()
     let app_state = Arc::new(AppState {
         db: pool.clone(),
@@ -97,7 +84,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let app_state_alloy = app_state.clone();
     let app_state_axum = app_state.clone();
     let contract_manager = tokio::spawn(async move {
-        let mut active_monitors: JoinSet<Result<(), Box<dyn Error + Send + Sync>>> = JoinSet::new();
+        let active_monitors: JoinSet<Result<(), Box<dyn Error + Send + Sync>>> = JoinSet::new();
 
         // while let Some(new_contract) = contract_spawner_rx.recv().await {
         //     active_monitors.spawn(monitor_contract_events(

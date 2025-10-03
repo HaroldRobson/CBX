@@ -1,5 +1,4 @@
 use std::error::Error;
-use tokio::sync::mpsc;
 
 #[derive(Debug, Clone)]
 pub struct MonitorError {

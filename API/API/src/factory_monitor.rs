@@ -1,21 +1,14 @@
 use crate::AppState;
 use crate::error_handling::{ErrorSeverity, MonitorError};
 use alloy::primitives::Address;
-use alloy::providers::{Provider, ProviderBuilder, RootProvider};
-use alloy::rpc::types::BlockNumberOrTag;
-use alloy::rpc::types::{Filter, Log};
+use alloy::providers::Provider;
+use alloy::rpc::types::Log;
 use alloy::sol;
 use alloy::sol_types::SolEvent;
 use futures_util::StreamExt;
-use lettre::{
-    Message, SmtpTransport, Transport,
-    message::{Attachment, Body, Mailbox, MultiPart, SinglePart, header::ContentType},
-    transport::smtp::authentication::Credentials,
-};
-use sqlx::postgres::PgPool;
+use lettre::Transport;
 use std::error::Error;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 use tokio::sync::mpsc;
 sol! {
     #[sol(rpc)]
