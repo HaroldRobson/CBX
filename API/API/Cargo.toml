@@ -4,14 +4,17 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-alloy = "1.0.30"
+alloy = { version = "1.0.37", features = ["full"]}
 alloy-primitives = "1.3.1"
 alloy-signer = "1.0.30"
 axum = "0.8.4"
 axum-macros = "0.5.0"
+chrono = "0.4.42"
 dotenv = "0.15.0"
+futures-util = "0.3.31"
 hex = "0.4.3"
 lettre = { version = "0.11.18", default-features = false, features = ["tokio1-rustls", "smtp-transport", "builder", "ring", "rustls-native-certs"] }
+reqwest = "0.12.23"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.143"
 sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio", "macros"] }

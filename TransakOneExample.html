@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+
+<body style="margin:0; padding:0; height: 100%; display: grid">
+  <div
+    style="position: relative; width: 500px; height: 80dvh; margin: auto; box-shadow: 0 0 15px #1461db; border-radius: 15px; overflow: hidden">
+
+    <iframe id="transakIframe" src="https://global-stg.transak.com/
+?apiKey=69feba7f-a1c2-4cfa-a9bd-43072768b0e6
+&isTransakOne=true
+&smartContractAddress=0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951
+&estimatedGasLimit=237608
+&calldata=eJylzdEJxDAMA9BdOoEjy%2FZlnDhOZuj47Q0QOLj3J4TQJbe3yCEacoC%2BUZQUF4NQnWMb1%2FSILAFqEFaip%2F0vEO1cfmwtj6ZYk%2BiRby6rlpxuBEt914j65%2F%2FregCZFTk1
+&cryptoCurrencyData=W3siY3J5cHRvQ3VycmVuY3lDb2RlIjoiQVdCVEMiLCJjcnlwdG9DdXJyZW5jeU5hbWUiOiJBYXZlIFBvbHlnb24gV0JUQyIsImNyeXB0b0N1cnJlbmN5SW1hZ2VVUkwiOiJodHRwczovL2Fzc2V0cy5jb2luZ2Vja28uY29tL2NvaW5zL2ltYWdlcy8xMTczNC9zdGFuZGFyZC9hV0JUQy5wbmcifV0%3D
+&network=ethereum
+&sourceTokenData=W3sic291cmNlVG9rZW5Db2RlIjoiV0JUQyIsInNvdXJjZVRva2VuQW1vdW50IjowLjAwMDF9XQ%3D%3D
+&walletAddress=0xAc1b1aFBF71D66BE92415D84888d1601728Ba2F1" allow="camera;microphone;payment"
+      style="height: 100%; width: 100%; border: none">
+    </iframe>
+  </div>
+
+  <script>
+    class Pusher {
+      constructor(apiKey, options) {
+        console.log("Pusher initialized with API key:", apiKey);
+      }
+
+      subscribe(channelName) {
+        console.log("Subscribed to channel:", channelName);
+        return {
+          bind_global(callback) {
+            console.log("Bound to all events globally");
+          },
+          bind(eventName, callback) {
+            console.log(`Bound to event '${eventName}'`);
+          }
+        };
+      }
+    }
+
+    // Simulate the Transak object
+    const Transak = {
+      EVENTS: {
+        TRANSAK_ORDER_CREATED: "TRANSAK_ORDER_CREATED"
+      },
+      on(eventName, callback) {
+        console.log(`Listening for event '${eventName}'`);
+      }
+    };
+
+    // Simulate the init function
+    function initTransak() {
+      console.log("Transak initialized");
+    }
+
+    // Call the init function
+    initTransak();
+  </script>
+</body>
+
+</html>

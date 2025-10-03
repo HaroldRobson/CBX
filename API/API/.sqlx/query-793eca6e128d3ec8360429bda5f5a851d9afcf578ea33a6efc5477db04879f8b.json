@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO pending_registry_transfers_gs (pool_address, seller_address, tx_hash, amount, registry_transaction_id) VALUES ($1, $2, $3, $4, $5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "793eca6e128d3ec8360429bda5f5a851d9afcf578ea33a6efc5477db04879f8b"
+}

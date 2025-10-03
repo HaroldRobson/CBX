@@ -82,6 +82,7 @@ contract NFTReceipt is ERC721 {
         receipts[NFTID] = retirementReceipt;
     }
 
+    
     function sendReceipts(bytes memory retirementBundle) external onlyPool { 
         PendingRetirement[] memory retirements = abi.decode(retirementBundle, (PendingRetirement[]));
         uint256 totalTokensInBundle = 0;
@@ -104,6 +105,9 @@ contract NFTReceipt is ERC721 {
         bundleCounter++;
 
     }
+
+
+
     function getPendingBundles() external view returns (awaitingReceipt[] memory) {
         uint256 num = 0;
         for (uint i = 0; i < bundleCounter; i++) {
