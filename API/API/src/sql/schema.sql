@@ -47,4 +47,12 @@ CREATE TABLE IF NOT EXISTS handled_evm_events (
   block_number INT NOT NULL
 );
 
+CREATE TYPE severity AS ENUM ('warning', 'error', 'fatal');
 
+CREATE TABLE IF NOT EXISTS error_logs (
+  id SERIAL PRIMARY KEY,
+  source VARCHAR(50),
+  message VARCHAR(1000),
+  timestamp TIMESTAMPTZ,
+  severity severity 
+);

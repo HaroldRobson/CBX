@@ -1,4 +1,5 @@
 use crate::AppState;
+use crate::NewPool;
 use crate::error_handling::{ErrorSeverity, MonitorError};
 use alloy::primitives::Address;
 use alloy::providers::Provider;
@@ -35,13 +36,13 @@ pub enum Status {
 pub async fn monitor_factory<P>(
     factory_address: Address,
     app_state: Arc<AppState<P>>,
-    spawner_tx: mpsc::Sender<Address>,
-    error_monitoring_tx: mpsc::Sender<MonitorError>,
-    log_handling_tx: mpsc::Sender<Log>,
+    spawner_tx: mpsc::Sender<NewPool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>>
 where
     P: Provider + 'static,
 {
+    let error_monitoring_tx = app_state.error_monitoring_tx.clone();
+    let log_handling_tx = app_state.log_handling_tx.clone();
     let handle1 = tokio::spawn(monitor_new_pending_pools(
         factory_address.clone(),
         app_state.clone(),
@@ -71,14 +72,14 @@ where
         log_handling_tx.clone(),
     ));
 
-    tokio::try_join!(handle1, handle2, handle3, handle4);
+    let _ = tokio::try_join!(handle1, handle2, handle3, handle4);
     Ok(())
 }
 
 async fn monitor_new_pending_pools<P>(
     factory_address: Address,
     app_state: Arc<AppState<P>>,
-    spawner_tx: mpsc::Sender<Address>,
+    spawner_tx: mpsc::Sender<NewPool>,
     error_monitoring_tx: mpsc::Sender<MonitorError>,
     log_handling_tx: mpsc::Sender<Log>,
 ) where
@@ -90,11 +91,13 @@ async fn monitor_new_pending_pools<P>(
     let filter = match contract.newPendingPool_filter().watch().await {
         Ok(fil) => fil,
         Err(e) => {
-            error_monitoring_tx.send(MonitorError::new(
-                "monitor_new_pending_pools",
-                format!("filter initialise error: {:?}", e),
-                ErrorSeverity::Fatal,
-            ));
+            let _ = error_monitoring_tx
+                .send(MonitorError::new(
+                    "monitor_new_pending_pools",
+                    format!("filter initialise error: {:?}", e),
+                    ErrorSeverity::Fatal,
+                ))
+                .await;
             return;
         }
     };
@@ -108,45 +111,39 @@ async fn monitor_new_pending_pools<P>(
                 match sqlx::query!(
                             "INSERT INTO pool_details (pool_status, pool_address, ipfs_uri, credit_id, seller_address, initial_supply, seller_registry_details, registry) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
                             "pending" as _,
-                            event.Address.to_string(),  // $2 - address as strin,
-                            event.IPFS.clone(),  // $3 - strin,
-                            credit_id,  // $4 - string or whatever typ,
-                            event.Seller.to_string(),  // $5 - address as strin,
-                            event.initialSupply.to::<i32>(),  // $6 - convert U256 to i6,
-                            seller_registry_details,  // $7 - depends on your typ,
-                            event.registry.to::<i32>())  // $8 - convert U256 to i6,
+                            event.Address.to_string(),  
+                            event.IPFS.clone(),  
+                            credit_id, 
+                            event.Seller.to_string(), 
+                            event.initialSupply.to::<i32>(),
+                            seller_registry_details,
+                            event.registry.to::<i32>()) 
                             .execute(&app_state.db)
                             .await {
                                 Ok(_q) => {
-                                        log_handling_tx.send(log);
+                                     let _ = log_handling_tx.send(log).await;
+                                     let new_pool = NewPool::new(event.Address, event.registry.to::<i32>(), event.Seller, event.IPFS);
+                                     let _ = spawner_tx.send(new_pool).await;
                                     }
                                 Err(e) => {
-                                    error_monitoring_tx.send(MonitorError::new(
+                                    let _ = error_monitoring_tx.send(MonitorError::new(
                                         "monitor_new_pending_pools",
                                         format!("pool_details db write \n error: {:?},\n EVM event log: {:?}", e, log.clone()),
                                         ErrorSeverity::Error,
-                                        ));
+                                        )).await;
                                         }
 
                                     };
             }
             Err(e) => {
-                error_monitoring_tx.send(MonitorError::new(
-                    "monitor_new_pending_pools",
-                    format!("error in stream.next().await: {:?}", e),
-                    ErrorSeverity::Fatal,
-                ));
-            } // let new_contract = NewContract {
-              //     address: event.address,
-              //     registry: match event.registry {
-              //         0 => Registry::GoldStandard,
-              //         1 => Registry::Verra,
-              //         _ => Registry::ACR, // bad error handling.
-              //     },
-              //     seller: event.seller,
-              //     ipfs: event.ipfs,
-              // };
-              // spawner_tx.send(new_contract).await?;
+                let _ = error_monitoring_tx
+                    .send(MonitorError::new(
+                        "monitor_new_pending_pools",
+                        format!("error in stream.next().await: {:?}", e),
+                        ErrorSeverity::Fatal,
+                    ))
+                    .await;
+            }
         };
     }
 }
@@ -164,11 +161,13 @@ async fn monitor_pools_activated<P>(
     let filter = match contract.newPendingPool_filter().watch().await {
         Ok(fil) => fil,
         Err(e) => {
-            error_monitoring_tx.send(MonitorError::new(
-                "monitor_pools_activated",
-                format!("filter initialise error: {:?}", e),
-                ErrorSeverity::Fatal,
-            ));
+            let _ = error_monitoring_tx
+                .send(MonitorError::new(
+                    "monitor_pools_activated",
+                    format!("filter initialise error: {:?}", e),
+                    ErrorSeverity::Fatal,
+                ))
+                .await;
             return;
         }
     };
@@ -186,26 +185,28 @@ async fn monitor_pools_activated<P>(
                 .await
                 {
                     Ok(_q) => {
-                        log_handling_tx.send(log);
+                        let _ = log_handling_tx.send(log).await;
                     }
                     Err(e) => {
-                        error_monitoring_tx.send(MonitorError::new(
+                        let _ = error_monitoring_tx.send(MonitorError::new(
                             "monitor_pools_activated",
                             format!(
                                 "pool_details update to active error: {:?}, \n EVM event log: {:?}",
                                 e, log
                             ),
                             ErrorSeverity::Warning,
-                        ));
+                        )).await;
                     }
                 };
             }
             Err(e) => {
-                error_monitoring_tx.send(MonitorError::new(
-                    "monitor_pools_activated",
-                    format!("error in stream.next().await: {:?}", e),
-                    ErrorSeverity::Fatal,
-                ));
+                let _ = error_monitoring_tx
+                    .send(MonitorError::new(
+                        "monitor_pools_activated",
+                        format!("error in stream.next().await: {:?}", e),
+                        ErrorSeverity::Fatal,
+                    ))
+                    .await;
                 return;
 
                 // then log them or something?
@@ -227,11 +228,13 @@ async fn monitor_pools_deactivated<P>(
     let filter = match contract.newPendingPool_filter().watch().await {
         Ok(fil) => fil,
         Err(e) => {
-            error_monitoring_tx.send(MonitorError::new(
-                "monitor_pools_deactivated",
-                format!("filter initialise error: {:?}", e),
-                ErrorSeverity::Fatal,
-            ));
+            let _ = error_monitoring_tx
+                .send(MonitorError::new(
+                    "monitor_pools_deactivated",
+                    format!("filter initialise error: {:?}", e),
+                    ErrorSeverity::Fatal,
+                ))
+                .await;
             return;
         }
     };
@@ -248,26 +251,28 @@ async fn monitor_pools_deactivated<P>(
                 .await
                 {
                     Ok(_q) => {
-                        log_handling_tx.send(log);
+                        let _ = log_handling_tx.send(log).await;
                     }
                     Err(e) => {
-                        error_monitoring_tx.send(MonitorError::new(
+                        let _ = error_monitoring_tx.send(MonitorError::new(
                             "monitor_pools_deactivated",
                             format!(
                                 "pool_details update to retired error: {:?}, \n EVM event log: {:?}",
                                 e, log
                             ),
                             ErrorSeverity::Warning,
-                        ));
+                        )).await;
                     }
                 };
             }
             Err(e) => {
-                error_monitoring_tx.send(MonitorError::new(
-                    "monitor_pools_deactivated",
-                    format!("error in stream.next().await: {:?}", e),
-                    ErrorSeverity::Fatal,
-                ));
+                let _ = error_monitoring_tx
+                    .send(MonitorError::new(
+                        "monitor_pools_deactivated",
+                        format!("error in stream.next().await: {:?}", e),
+                        ErrorSeverity::Fatal,
+                    ))
+                    .await;
 
                 return;
                 // then log them or something?
@@ -289,11 +294,13 @@ async fn monitor_seller_refund_requests<P>(
     let filter = match contract.refundSeller_filter().watch().await {
         Ok(fil) => fil,
         Err(e) => {
-            error_monitoring_tx.send(MonitorError::new(
-                "monitor_seller_refund_requests",
-                format!("filter initialise error: {:?}", e),
-                ErrorSeverity::Fatal,
-            ));
+            let _ = error_monitoring_tx
+                .send(MonitorError::new(
+                    "monitor_seller_refund_requests",
+                    format!("filter initialise error: {:?}", e),
+                    ErrorSeverity::Fatal,
+                ))
+                .await;
             return;
         }
     };
@@ -314,22 +321,26 @@ async fn monitor_seller_refund_requests<P>(
                 {
                     Ok(rti) => rti,
                     Err(e) => {
-                        error_monitoring_tx.send(MonitorError::new(
-                            "monitor_seller_refund_requests",
-                            format!("BIG PROBLEM!! ERROR REFUNDING SELLER: {:?}", e),
-                            ErrorSeverity::Error,
-                        ));
+                        let _ = error_monitoring_tx
+                            .send(MonitorError::new(
+                                "monitor_seller_refund_requests",
+                                format!("BIG PROBLEM!! ERROR REFUNDING SELLER: {:?}", e),
+                                ErrorSeverity::Error,
+                            ))
+                            .await;
                         continue;
                     }
                 };
                 let tx_hash = match log.transaction_hash {
                     Some(hash) => hash.to_string(),
                     None => {
-                        error_monitoring_tx.send(MonitorError::new(
-                            "monitor_seller_refund_requests",
-                            format!("EVM Log had no transaction hash - strange"),
-                            ErrorSeverity::Warning,
-                        ));
+                        let _ = error_monitoring_tx
+                            .send(MonitorError::new(
+                                "monitor_seller_refund_requests",
+                                format!("EVM Log had no transaction hash - strange"),
+                                ErrorSeverity::Warning,
+                            ))
+                            .await;
 
                         continue;
                     }
@@ -348,17 +359,17 @@ async fn monitor_seller_refund_requests<P>(
                         .execute(&app_state.db)
                         .await {
                     Ok(_q) => {
-                        log_handling_tx.send(log);
+                        let _ = log_handling_tx.send(log).await;
                     }
                     Err(e) => {
-                        error_monitoring_tx.send(MonitorError::new(
+                        let _ = error_monitoring_tx.send(MonitorError::new(
                             "monitor_seller_refund_requests",
                             format!(
                                 "pending_registry_transfers insert error: {:?}, \n EVM event log: {:?}",
                                 e, log
                             ),
                             ErrorSeverity::Warning,
-                        ));
+                        )).await;
                     }
                 };
                     }
@@ -366,11 +377,13 @@ async fn monitor_seller_refund_requests<P>(
                 }
             }
             Err(e) => {
-                error_monitoring_tx.send(MonitorError::new(
-                    "monitor_seller_refund_requests",
-                    format!("error in stream.next().await: {:?}", e),
-                    ErrorSeverity::Fatal,
-                ));
+                let _ = error_monitoring_tx
+                    .send(MonitorError::new(
+                        "monitor_seller_refund_requests",
+                        format!("error in stream.next().await: {:?}", e),
+                        ErrorSeverity::Fatal,
+                    ))
+                    .await;
 
                 return;
             }

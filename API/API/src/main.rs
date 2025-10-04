@@ -1,8 +1,5 @@
 use axum::Router;
-use lettre::{
-    SmtpTransport,
-    transport::smtp::authentication::Credentials,
-};
+use lettre::{SmtpTransport, transport::smtp::authentication::Credentials};
 use std::error::Error;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -13,9 +10,10 @@ use sqlx::postgres::PgPoolOptions;
 use tokio::task::JoinSet;
 mod error_handling;
 use crate::error_handling::MonitorError;
-use alloy::primitives::address;
+use alloy::primitives::{Address, address};
 use alloy::providers::{Provider, ProviderBuilder, WsConnect};
 use tokio::sync::Mutex;
+mod email_handler;
 mod log_handling;
 pub enum Registry {
     GoldStandard,
@@ -30,9 +28,29 @@ where
     P: Provider + 'static,
 {
     db: PgPool,
-    mailer: Mutex<SmtpTransport>,
     provider: Arc<P>,
+    error_monitoring_tx: tokio::sync::mpsc::Sender<MonitorError>,
+    log_handling_tx: tokio::sync::mpsc::Sender<alloy::rpc::types::Log>,
 }
+
+pub struct NewPool {
+    address: Address,
+    registry: i32,
+    seller: Address,
+    ipfs_uri: String,
+}
+
+impl NewPool {
+    pub fn new(address: Address, registry: i32, seller: Address, ipfs_uri: String) -> Self {
+        Self {
+            address: address,
+            registry: registry,
+            seller: seller,
+            ipfs_uri: ipfs_uri,
+        }
+    }
+}
+
 async fn create_mailer() -> Result<SmtpTransport, Box<dyn Error>> {
     let username = std::env::var("EMAIL_USERNAME")?;
     let password = std::env::var("EMAIL_PASSWORD")?;
@@ -71,15 +89,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let provider = Arc::new(provider_unarced);
     let factory_addr = address!("1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
     // Spawn factory monitor
-    let (contract_spawner_tx, contract_spawner_rx) = tokio::sync::mpsc::channel(100);
+    let (contract_spawner_tx, contract_spawner_rx) = tokio::sync::mpsc::channel::<NewPool>(100);
     let (error_monitoring_tx, error_monitoring_rx) =
         tokio::sync::mpsc::channel::<MonitorError>(100);
     let (log_handling_tx, log_handling_rx) =
         tokio::sync::mpsc::channel::<alloy::rpc::types::Log>(100); // use these for handle_logs()
     let app_state = Arc::new(AppState {
         db: pool.clone(),
-        mailer: Mutex::new(mailer),
         provider: provider.clone(),
+        error_monitoring_tx: error_monitoring_tx,
+        log_handling_tx: log_handling_tx,
     });
     let app_state_alloy = app_state.clone();
     let app_state_axum = app_state.clone();
@@ -96,8 +115,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             factory_addr,
             app_state_alloy,
             contract_spawner_tx,
-            error_monitoring_tx.clone(),
-            log_handling_tx.clone(),
         ));
     });
     let app = Router::new().with_state(app_state_axum);
