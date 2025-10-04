@@ -56,3 +56,15 @@ CREATE TABLE IF NOT EXISTS error_logs (
   timestamp TIMESTAMPTZ,
   severity severity 
 );
+
+CREATE TABLE IF NOT EXISTS evm_logs (
+  address VARCHAR(50) NOT NULL,
+  block_number INT NOT NULL,
+  transaction_hash VARCHAR(70),
+  transaction_index INT,
+  log_index INT NOT NULL,
+  block_timestamp BIGINT,
+  removed BOOLEAN,
+  bytes BYTEA,
+  PRIMARY KEY (block_number, log_index)
+);

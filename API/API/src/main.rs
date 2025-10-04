@@ -14,15 +14,10 @@ use alloy::primitives::{Address, address};
 use alloy::providers::{Provider, ProviderBuilder, WsConnect};
 use tokio::sync::Mutex;
 mod email_handler;
+use email_handler::Email;
+use email_handler::handle_emails;
 mod log_handling;
-pub enum Registry {
-    GoldStandard,
-    Verra,
-    ACR,
-    CAR,
-    ICR,
-}
-
+use crate::log_handling::handle_logs;
 pub struct AppState<P>
 where
     P: Provider + 'static,
@@ -31,8 +26,10 @@ where
     provider: Arc<P>,
     error_monitoring_tx: tokio::sync::mpsc::Sender<MonitorError>,
     log_handling_tx: tokio::sync::mpsc::Sender<alloy::rpc::types::Log>,
+    email_handling_tx: tokio::sync::mpsc::Sender<Email>,
 }
 
+// source of truth for registry <=> int is in smart contract comment somewhere
 pub struct NewPool {
     address: Address,
     registry: i32,
@@ -49,19 +46,6 @@ impl NewPool {
             ipfs_uri: ipfs_uri,
         }
     }
-}
-
-async fn create_mailer() -> Result<SmtpTransport, Box<dyn Error>> {
-    let username = std::env::var("EMAIL_USERNAME")?;
-    let password = std::env::var("EMAIL_PASSWORD")?;
-
-    let creds = Credentials::new(username, password);
-
-    let mailer = SmtpTransport::starttls_relay("mail.privateemail.com")?
-        .credentials(creds)
-        .port(587)
-        .build();
-    Ok(mailer)
 }
 
 #[tokio::main]
@@ -82,7 +66,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             std::process::exit(1);
         }
     };
-    let mailer = create_mailer().await?;
     let rpc_url = "wss://polygon-mainnet.infura.io/ws/v3/8b40287c8b444d51aaa642f0e9874edd";
     let ws = WsConnect::new(rpc_url);
     let provider_unarced = ProviderBuilder::new().connect_ws(ws).await?;
@@ -94,29 +77,42 @@ async fn main() -> Result<(), Box<dyn Error>> {
         tokio::sync::mpsc::channel::<MonitorError>(100);
     let (log_handling_tx, log_handling_rx) =
         tokio::sync::mpsc::channel::<alloy::rpc::types::Log>(100); // use these for handle_logs()
+    let (email_handling_tx, mut email_handling_rx) = tokio::sync::mpsc::channel::<Email>(100);
     let app_state = Arc::new(AppState {
         db: pool.clone(),
         provider: provider.clone(),
         error_monitoring_tx: error_monitoring_tx,
         log_handling_tx: log_handling_tx,
+        email_handling_tx: email_handling_tx,
     });
     let app_state_alloy = app_state.clone();
+    let app_state_factory_monitor = app_state.clone();
+    let app_state_email = app_state.clone();
+    let app_state_logs = app_state.clone();
     let app_state_axum = app_state.clone();
-    let contract_manager = tokio::spawn(async move {
-        let active_monitors: JoinSet<Result<(), Box<dyn Error + Send + Sync>>> = JoinSet::new();
+    // let contract_manager = tokio::spawn(async move {
+    //     let active_monitors: JoinSet<Result<(), Box<dyn Error + Send + Sync>>> = JoinSet::new();
+    //
+    //     // while let Some(new_contract) = contract_spawner_rx.recv().await {
+    //     //     active_monitors.spawn(monitor_contract_events(
+    //     //         new_contract,
+    //     //         app_state_axum.clone()
+    //     //     ));
+    //     // }
+    //     let factory_task = tokio::spawn(monitor_factory(
+    //         factory_addr,
+    //         app_state_factory_monitor,
+    //         contract_spawner_tx,
+    //     ));
+    // });
 
-        // while let Some(new_contract) = contract_spawner_rx.recv().await {
-        //     active_monitors.spawn(monitor_contract_events(
-        //         new_contract,
-        //         app_state_axum.clone()
-        //     ));
-        // }
-        let factory_task = tokio::spawn(monitor_factory(
-            factory_addr,
-            app_state_alloy,
-            contract_spawner_tx,
-        ));
-    });
+    let factory_monitor = tokio::spawn(monitor_factory(
+        factory_addr,
+        app_state_factory_monitor,
+        contract_spawner_tx,
+    ));
+    let email_handler = tokio::spawn(handle_emails(app_state_email, email_handling_rx));
+    let log_handler = tokio::spawn(handle_logs(log_handling_rx, app_state_logs));
     let app = Router::new().with_state(app_state_axum);
     // put handlers here for db reading.
     // only write should be users associating wallet with email.

@@ -39,6 +39,10 @@ pub async fn monitor_errors<P>(
     while let Some(monitor_error) = error_monitor_rx.recv().await {
         match monitor_error.severity {
             ErrorSeverity::Fatal => {
+                eprintln!(
+                    "FATAL ERROR: {:?}, \n SOURCE: {:?}, \n",
+                    monitor_error.message, monitor_error.source
+                );
                 // send me an email
             }
             _ => {
