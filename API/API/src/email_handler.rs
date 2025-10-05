@@ -30,6 +30,16 @@ pub struct SimpleEmail {
     pub recipient_email: String,
 }
 
+impl SimpleEmail {
+    pub fn new(content: &str, subject: &str, recipient_email: &str) -> Self {
+        Self {
+            content: content.to_string(),
+            subject: subject.to_string(),
+            recipient_email: recipient_email.to_string(),
+        }
+    }
+}
+
 pub struct HtmlEmail {
     pub replacement_words: Vec<String>,
     pub subject: String,
