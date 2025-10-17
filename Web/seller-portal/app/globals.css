@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    line-height: 1.5;
+    background-color: #111827;
+    color: #ffffff;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .font-mono-numbers {
+    font-family: 'Roboto Mono', monospace;
+  }
+}
+
+@layer components {
+  .gradient-border {
+    background: linear-gradient(90deg, #2ed37d, #3b82f6);
+    padding: 1px;
+    border-radius: 0.5rem;
+  }
+  
+  .gradient-border-content {
+    background: #1F2937;
+    border-radius: calc(0.5rem - 1px);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Smooth transitions */
+* {
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Button hover effects */
+button:not(:disabled) {
+  transform: translateY(0);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Input focus styles */
+input:focus, select:focus {
+  box-shadow: 0 0 0 3px rgba(46, 211, 125, 0.1);
+}
+
+/* Card hover effects */
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,36 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo lock file (uncomment if building a library)
+# Cargo.lock
+
+# Backup files
+*~
+*.swp
+*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+
+# Database files (if applicable)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
