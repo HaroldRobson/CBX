@@ -64,7 +64,10 @@ export function HeroSection() {
         {/* Content - Sits on top of all background elements */}
         <div className="relative z-10 min-h-screen flex items-center justify-center px-4 pt-16">
           <div className="max-w-4xl mx-auto text-center">
-            <motion.div
+
+            {/* Etherlink 2 leaf commented out */}
+
+            {/* <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0, ease: "easeOut" }}
@@ -74,7 +77,7 @@ export function HeroSection() {
                 <Leaf className="w-4 h-4 mr-2" />
                 Powered by Etherlink L2
               </span>
-            </motion.div>
+            </motion.div> */}
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -94,8 +97,7 @@ export function HeroSection() {
               transition={{ duration: 0.2, delay: 0.1, ease: "easeOut" }}
               className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              Retire carbon credits in any amount you want. Get blockchain verification 
-              and NFT receipts. Pay lower fees than traditional brokers.
+              Retire carbon credits in any amount you want. Pay lower fees than traditional brokers. Immediate transfers only a few clicks away.
             </motion.p>
 
             <motion.div
@@ -148,8 +150,8 @@ export function HeroSection() {
                 <div className="text-gray-600 dark:text-gray-400 text-sm">Transparent</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-400 mb-2">NFT</div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm">Retirement receipts</div>
+                <div className="text-3xl font-bold text-green-400 mb-2">Instant</div>
+                <div className="text-gray-600 dark:text-gray-400 text-sm">Credit transfer</div>
               </div>
             </motion.div>
 

@@ -44,7 +44,7 @@ export function Footer() {
             >
               <p className="text-gray-700 dark:text-gray-400 leading-relaxed text-sm">
                 The leading carbon credit platform. Retire any amount of credits. 
-                Get blockchain verification and complete transparency.
+                Get instantaneous verification, low fees and complete transparency with every transfer.
               </p>
             </motion.div>
 
@@ -105,12 +105,12 @@ export function Footer() {
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             © 2025 CBX. All rights reserved.
           </p>
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
+          {/* <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <span className="text-gray-600 dark:text-gray-400 text-sm">Powered by</span>
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-medium">
               Etherlink L2
             </div>
-          </div>
+          </div> */}
         </motion.div>
       </div>
     </footer>

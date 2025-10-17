@@ -13,23 +13,23 @@ export function FAQSection() {
   const faqs = [
     {
       question: 'What makes CBX different from other carbon credit platforms?',
-      answer: 'CBX lets you retire any amount of carbon credits, not just whole tonnes. We charge much lower fees than traditional brokers (who charge 20-40%). You get full transparency through our rating system. Every retirement comes with an NFT receipt. We built everything on Etherlink L2 to keep costs low.',
+      answer: 'CBX lets you retire any amount of carbon credits, not just whole tonnes. We charge much lower fees than traditional brokers (who charge 20-40%). You get full transparency through our rating system. Every retirement comes with a unique digital certificate containing all the transaction details, providing a secure and easily verifiable record of your environmental impact.',
     },
     {
       question: 'How does fractional retirement work?',
       answer: 'You can retire 0.1 tonnes, 0.5 tonnes, or any amount you want. Our smart contract collects fractional amounts from different users. When we have enough fractions to make whole tonnes, we retire them with Verra. This makes carbon offsetting affordable for everyone.',
     },
     {
-      question: 'What are NFT retirement receipts?',
-      answer: 'Every time you retire credits with CBX, you get an NFT from Verra. This NFT proves you retired the credits. It cannot be faked or changed. The NFT shows your exact amount in its metadata. This creates a permanent record on the blockchain.',
+      question: 'Why is a digital certificate better than a traditional one?',
+      answer: 'Our digital certificates offer superior speed, security, and convenience. You receive your proof of retirement instantly upon purchase, ready to be shared with stakeholders or featured in sustainability reports without delay. Your digital proof is permanently stored and always accessible. This modern approach also provides enhanced security, preventing fraud and the double-counting of credits.',
     },
     {
       question: 'How does the credit rating system work?',
       answer: 'We built an algorithm that checks carbon credit quality. It looks at the project methodology, additionality, permanence, leakage risk, and verification standards. You get a score from 1-100. Higher scores mean better, more reliable credits.',
     },
     {
-      question: 'What is Etherlink L2 and why do you use it?',
-      answer: 'Etherlink L2 is a blockchain that works on top of Ethereum. It has much lower gas costs than regular Ethereum. This makes our fractional retirement system affordable. You can offset small amounts without paying huge fees.',
+      question: 'Can I trust the data on this platform?',
+      answer: 'Absolutely. The platform operates on a principle of complete transparency. All transaction data is recorded in a way that is publicly verifiable, meaning anyone can independently confirm that a specific carbon credit was retired without revealing any sensitive personal information.',
     },
     {
       question: 'Are the carbon credits verified?',

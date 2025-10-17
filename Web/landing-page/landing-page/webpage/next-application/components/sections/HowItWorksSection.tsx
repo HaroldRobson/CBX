@@ -17,8 +17,8 @@ export function HowItWorksSection() {
     },
     {
       number: '2',
-      title: 'Tokenize on Blockchain',
-      description: 'Each credit becomes a CBX token on Etherlink L2, enabling fractional ownership, trading, and transparent tracking.',
+      title: 'Find and Verify Your Impact',
+      description: 'Explore our marketplace of high-quality carbon projects. We provide the data and insights you need to confidently select the project that best aligns with your goals and decide on the exact amount you wish to retire.',
     },
     {
       number: '3',
@@ -27,13 +27,13 @@ export function HowItWorksSection() {
     },
     {
       number: '4',
-      title: 'Instant Settlement',
-      description: 'On-chain settlement happens instantly with full transparency and immutable records on the blockchain.',
+      title: 'Purchase & Retire',
+      description: 'Instantly purchase and retire any amount of carbon credits directly on our platform.',
     },
     {
       number: '5',
-      title: 'NFT Proof Receipt',
-      description: 'Receive immutable NFT retirement receipts from Verra with your fractional amount recorded in the metadata.',
+      title: 'Instant Proof',
+      description: 'Receive immediate, verifiable proof of your carbon credit retirement.',
     },
   ];
 
@@ -61,19 +61,19 @@ export function HowItWorksSection() {
               transition={{ duration: 0.2, delay: 0.1, ease: "easeOut" }}
               className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed mb-8"
             >
-              We revolutionize carbon credit markets through blockchain technology, 
-              making fractional retirement accessible with full transparency and lower fees.
+              We're revolutionizing the carbon credit market by replacing outdated, manual processes with a seamless digital platform. 
+              This allows for instant, fractional retirement of credits, providing greater transparency and lower fees for everyone involved.
             </motion.p>
             
             {/* Decorative Arrow - Static, no animation */}
-            <div className="hidden lg:block mt-16">
+            <div className="hidden lg:block mt-16 ml-8">
               <svg 
-                className="w-64 h-32" 
-                viewBox="0 0 256 128" 
+                className="w-140 h-70"
+                viewBox="0 0 320 160"
                 fill="none"
               >
                 <path
-                  d="M20 100 Q 80 20, 200 60"
+                  d="M20 20 C 80 120, 220 100, 290 100"
                   stroke="#10b981"
                   strokeWidth="2"
                   strokeDasharray="8 8"
@@ -81,7 +81,7 @@ export function HowItWorksSection() {
                   className="opacity-60"
                 />
                 <path
-                  d="M190 55 L200 60 L190 65"
+                  d="M290 95 L300 100 L290 105"
                   stroke="#10b981"
                   strokeWidth="2"
                   fill="none"

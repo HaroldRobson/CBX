@@ -1,10 +1,11 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { LocalSEO } from '@/components/seo/LocalSEO';
+import { Metadata } from 'next';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'CBX - Carbon Credit Exchange',
   description: 'The future of carbon credits is here. Retire carbon credits in any amount you want with blockchain verification and NFT receipts.',
 };
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <LocalSEO />
         <script
