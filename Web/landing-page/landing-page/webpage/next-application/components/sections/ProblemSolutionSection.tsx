@@ -50,10 +50,12 @@ const AnimatedRow: React.FC<AnimatedRowProps> = ({ children, index }) => {
   };
 
   return (
+    <>
     {/* @ts-ignore */} // need to fix this later
     <div ref={ref} style={style} key={isInView ? 'visible' : 'hidden'}>
       {children}
     </div>
+    </>
   );
 };
 
