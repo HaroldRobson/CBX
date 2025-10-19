@@ -40,6 +40,7 @@ contract CBX is ERC20 {
     event reserveOfCBXChanged(uint256 newReserve);
     event poolDeactivated(uint256 reservesLeft);
     event transferoffChain(uint256 amount, string details);
+    event poolActivated();
 
     struct PoolSummary {
         // used in getPoolSummary
@@ -115,6 +116,7 @@ contract CBX is ERC20 {
 
     function activate() external onlyFactory {
         status = PoolStatus.ACTIVE;
+        emit poolActivated(); // way easier for our backend if this contract emits instead of having to go through factory. 
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -181,6 +183,7 @@ contract CBX is ERC20 {
     }
 
     function buyTokensWithUSDC(uint256 amountOfCBXOut) external {
+        require(status == PoolStatus.ACTIVE, "Pool is not active!");
         // should be 100 times the tota number of credits the user wants
         require(amountOfCBXOut <= balanceOf(address(this)), "We don't have enough carbon credits in our pool");
         uint256 pricePerTokenWithFee = getUSDCPricePerTokenWithFee();
@@ -198,6 +201,7 @@ contract CBX is ERC20 {
 
     function buyAndRetireTokensWithUSDC(uint256 amountOfCBXOut) external payable {
         // should be 100 times the tota number of credits the user wants
+        require(status == PoolStatus.ACTIVE, "Pool is not active!");
         require(amountOfCBXOut <= balanceOf(address(this)), "We don't have enough carbon credits in our pool");
         require(pendingRetirementQueue.length < MAX_PENDING_RETIREMENTS, "Retirement queue is full, try again later");
         require(msg.value >= RETIREMET_GAS_FEE);
@@ -306,7 +310,7 @@ contract CBX is ERC20 {
         payable(owner).transfer(msg.value);
         _burn(msg.sender, amountOfTokens);
         PendingRetirement memory retirement = PendingRetirement({tokens: amountOfTokens, user: msg.sender, timestamp: block.timestamp});
-        PendingRetirement[] memory retirementBundle2 = new PendingRetirement[](1);
+        PendingRetirement[] memory retirementBundle2 = new PendingRetirement[]();
         retirementBundle2[0] = retirement;
         bundleCounter++;
         bytes memory retirementData = abi.encode(retirementBundle2);
