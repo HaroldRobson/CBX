@@ -48,6 +48,8 @@ impl NewPool {
             registry: registry,
             seller: seller,
             ipfs_uri: ipfs_uri,
+            tx_hash: "REPLACE".to_string(), // REPLACE
+            amount: 3 as i32,
         }
     }
 }

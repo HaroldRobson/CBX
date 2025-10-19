@@ -19,7 +19,8 @@ sol! {
     event poolDeactivated(uint256 reservesLeft);
     event transferoffChain(uint256 amount, string details);
     event TokensQueued(address indexed user, uint256 tokens);
-    event RetirementBundle(uint256 indexed bundleId, uint256 bundleSize, bytes RetirementData, address originalPool);
+    event RetirementBundle(uint256 bundleId, uint256 bundleSize, bytes RetirementData, address originalPool);
+    event retiredOnBehalfOf(uint256 bundleId, uint256 bundleSize, bytes RetirementData, address originalPool, string RetirementMessage);
     }
 }
 
@@ -36,6 +37,7 @@ where
     let error_monitoring_tx = app_state.error_monitoring_tx.clone();
     let log_handling_tx = app_state.log_handling_tx.clone();
     let provider = app_state.provider.clone();
+    let pool_address = new_pool.address;
     let contract = CBX::new(pool_address, provider);
 
     let filter = match contract.TokensQueued_filter().watch().await {
@@ -47,11 +49,10 @@ where
                 new_pool.amount
             ).execute(&app_state.db).await;
             match query {
-                Ok(_) => {/*email user*/}
-                Err(e) => {/*send over mpsc*/}
+                Ok(_) => { /*email user*/ }
+                Err(e) => { /*send over mpsc*/ }
             }
-
         }
-        Err(e) => {/*send to mpsc*/}
-    }
+        Err(e) => { /*send to mpsc*/ }
+    };
 }
