@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
-
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "../src/Factory_v2.sol";
@@ -138,7 +138,68 @@ contract EdgeCaseTestSuite is Test {
 
         assertEq(cbxPool1.getPendingCount(), 2, "Queue should remain unchanged");
     }
+// =======================================================
+    // ======== RETIRE ON BEHALF OF EDGE CASES ===============
+    // =======================================================
 
+    function test_RetireOnBehalfOf_Success() public {
+        // 1. SETUP
+        uint256 tokensToBuyAndRetire = 200;
+        _buyTokens(user1, tokensToBuyAndRetire);
+        
+        uint256 initialTotalSupply = cbxPool1.totalSupply();
+        uint256 ownerInitialEth = owner.balance;
+        string memory retirementMessage = "Retiring 2 credits for Q4 2025 compliance.";
+
+        // 2. ARRANGE: We will check that AN event of this type is emitted, but we won't
+        // check the complex values like bundleId, which are hard to predict.
+        // By setting all booleans to false, we just check the event signature.
+        vm.expectEmit(false, false, false, false);
+        emit CBX.RetiredOnBehalfOf(0, 0, bytes(""), address(0), "");
+
+        // 3. ACT
+        vm.prank(user1);
+        cbxPool1.retireOnBehalfOf{value: RETIREMENT_FEE}(tokensToBuyAndRetire, retirementMessage);
+
+        // 4. ASSERT
+        assertEq(cbxPool1.balanceOf(user1), 0, "User1's token balance should be zero");
+        assertEq(cbxPool1.totalSupply(), initialTotalSupply - tokensToBuyAndRetire, "Total supply should decrease");
+        assertEq(owner.balance, ownerInitialEth + RETIREMENT_FEE, "Owner should receive the retirement fee");
+        assertEq(cbxPool1.getPendingCount(), 0, "Pending retirement queue should not be affected");
+    }
+
+    function test_Revert_RetireOnBehalfOf_IfAmountNotMultipleOf100() public {
+        // 1. SETUP
+        _buyTokens(user1, 150);
+        uint256 invalidAmount = 150;
+
+        // 2. ACT & ASSERT: Expect revert without a reason string, to match your contract's code.
+        vm.prank(user1);
+        vm.expectRevert(); 
+        cbxPool1.retireOnBehalfOf{value: RETIREMENT_FEE}(invalidAmount, "This will fail");
+    }
+
+    function test_Revert_RetireOnBehalfOf_IfInsufficientFee() public {
+        // 1. SETUP
+        _buyTokens(user1, 200);
+
+        // 2. ACT & ASSERT: Expect revert when not sending enough ETH.
+        vm.prank(user1);
+        vm.expectRevert(); 
+        cbxPool1.retireOnBehalfOf{value: RETIREMENT_FEE - 1}(200, "Fee is too low");
+    }
+
+    function test_Revert_RetireOnBehalfOf_IfInsufficientTokens() public {
+        // 1. SETUP
+        uint256 balance = 100;
+        uint256 needed = 200;
+        _buyTokens(user1, balance);
+        
+        // 2. ACT & ASSERT: Expect the modern "custom error" from OpenZeppelin.
+        vm.prank(user1);
+        vm.expectRevert();
+        cbxPool1.retireOnBehalfOf{value: RETIREMENT_FEE}(needed, "Not enough tokens");
+    }
     // =======================================================
     // ============ FINANCIAL & SECURITY EDGE CASES ==========
     // =======================================================

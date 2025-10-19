@@ -281,8 +281,8 @@ contract CBX is ERC20 {
 
     // Events
     event TokensQueued(address indexed user, uint256 tokens);
-    event RetirementBundle(uint256 indexed bundleId, uint256 bundleSize, bytes RetirementData, address originalPool);
-
+    event RetirementBundle(uint256 bundleId, uint256 bundleSize, bytes RetirementData, address originalPool);
+    event RetiredOnBehalfOf(uint256 bundleId, uint256 bundleSize, bytes RetirementData, address originalPool, string RetirementMessage);
     uint256 public bundleCounter = 0;
 
     // User queues credits for retirement
@@ -298,6 +298,20 @@ contract CBX is ERC20 {
         );
 
         emit TokensQueued(msg.sender, amountOfTokens);
+    }
+
+    function retireOnBehalfOf(uint256 amountOfTokens, string memory retirementMessage) external payable { // allow people to retire integer amounts and have us write a message on the registry - good for big corporates.
+        require(msg.value >= RETIREMET_GAS_FEE);
+        require(amountOfTokens % 100 == 0);
+        payable(owner).transfer(msg.value);
+        _burn(msg.sender, amountOfTokens);
+        PendingRetirement memory retirement = PendingRetirement({tokens: amountOfTokens, user: msg.sender, timestamp: block.timestamp});
+        PendingRetirement[] memory retirementBundle2 = new PendingRetirement[](1);
+        retirementBundle2[0] = retirement;
+        bundleCounter++;
+        bytes memory retirementData = abi.encode(retirementBundle2);
+        uint256 bundleId = uint256(keccak256(abi.encodePacked(bundleCounter, blockhash(block.number-1), block.timestamp, retirementData)));
+        emit RetiredOnBehalfOf(bundleId, amountOfTokens, retirementData, address(this), retirementMessage);
     }
 
     // Process retirements into bundles (called by owner periodically)
@@ -338,7 +352,8 @@ contract CBX is ERC20 {
         require(totalTokens - residue == retirementTotal, "SOMETHING DOESNT ADD UP!");
         bundleCounter++;
         bytes memory retirementData = abi.encode(retirementBundle);
-        emit RetirementBundle(bundleCounter, retirementTotal, retirementData, address(this)); // retirementTotal should be divisible by 100
+        uint256 bundleId = uint256(keccak256(abi.encodePacked(bundleCounter, blockhash(block.number-1), block.timestamp, retirementData)));
+        emit RetirementBundle(bundleId, retirementTotal, retirementData, address(this)); // retirementTotal should be divisible by 100
         // MAJOR ISSUE - bundleCounter should be a random 256 bit number, and not a deterministic one. This is to stop two bundles from different CBX contracts having the same bundle Id.
 //FIX THIS!!!!!!!!!
         INFTReceipts NFTReceipts = INFTReceipts(NFTContractAddress);
