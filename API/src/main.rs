@@ -42,14 +42,21 @@ pub struct NewPool {
 }
 
 impl NewPool {
-    pub fn new(address: Address, registry: i32, seller: Address, ipfs_uri: String) -> Self {
+    pub fn new(
+        address: Address,
+        registry: i32,
+        seller: Address,
+        ipfs_uri: String,
+        tx_hash: String,
+        amount: i32,
+    ) -> Self {
         Self {
             address: address,
             registry: registry,
             seller: seller,
             ipfs_uri: ipfs_uri,
-            tx_hash: "REPLACE".to_string(), // REPLACE
-            amount: 3 as i32,
+            tx_hash: tx_hash,
+            amount: amount,
         }
     }
 }

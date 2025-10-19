@@ -1,8 +1,11 @@
 use crate::AppState;
 use crate::NewPool;
+use crate::error_handling::{ErrorSeverity, MonitorError};
 use alloy::primitives::{Address, address};
 use alloy::providers::{Provider, ProviderBuilder, WsConnect};
+use alloy::rpc::types::Log;
 use alloy::sol;
+use futures_util::StreamExt;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
@@ -41,18 +44,50 @@ where
     let contract = CBX::new(pool_address, provider);
 
     let filter = match contract.TokensQueued_filter().watch().await {
-        Ok(event) => {
-            let query =  sqlx::query!("INSERT INTO queued_tokens (wallet_address, tx_hash, pool_address, amount) VALUES ($1, $2, $3, $4)", 
-                new_pool.seller.to_string(),
-                new_pool.tx_hash,
-                new_pool.address.to_string(),
-                new_pool.amount
-            ).execute(&app_state.db).await;
-            match query {
-                Ok(_) => { /*email user*/ }
-                Err(e) => { /*send over mpsc*/ }
-            }
+        Ok(fil) => fil,
+        Err(e) => {
+            let _ = error_monitoring_tx
+                .send(MonitorError::new(
+                    "monitor_new_pending_pools",
+                    format!("filter initialise error: {:?}", e),
+                    ErrorSeverity::Fatal,
+                ))
+                .await;
+            return;
         }
-        Err(e) => { /*send to mpsc*/ }
     };
+
+    let mut stream = filter.into_stream();
+    while let Some(result) = stream.next().await {
+        match result {
+            Ok((event, log)) => {
+                let tx_hash = match log.transaction_hash {
+                    Some(hash) => hash.to_string(),
+                    None => {
+                        let _ = error_monitoring_tx
+                            .send(MonitorError::new(
+                                "monitor_seller_refund_requests",
+                                format!("EVM Log had no transaction hash - strange"),
+                                ErrorSeverity::Warning,
+                            ))
+                            .await;
+
+                        continue;
+                    }
+                };
+                let query = sqlx::query!(
+                    "INSERT INTO queued_tokens (wallet_address, tx_hash, pool_address, amount) VALUES ($1, $2, $3, $4)",
+                    event.user.to_string(),
+                    tx_hash,
+                    new_pool.address.to_string(),
+                    event.tokens.to::<i32>(),
+                ).execute(&app_state.db).await;
+                match query {
+                    Ok(_) => { /*email user*/ }
+                    Err(e) => { /*send over mpsc*/ }
+                };
+            }
+            Err(e) => { /*send to mpsc*/ }
+        };
+    }
 }
