@@ -125,8 +125,21 @@ async fn monitor_new_pending_pools<P>(
                                 Ok(_q) => {
                                      let _ = log_handling_tx.send(log.clone()).await;
                                      let amount = event.initialSupply.to::<i32>();
-                                     let tx_hash = match log.transaction_hash {Some(hash) => hash.to_string(), None => continue};
-                                     let new_pool = NewPool::new(event.Address, event.registry.to::<i32>(), event.Seller, event.IPFS, tx_hash, amount);
+                                     let tx_hash = match log.transaction_hash {
+                                        Some(hash) => hash.to_string(),
+                                        None => {
+                                            let _ = error_monitoring_tx
+                                                .send(MonitorError::new(
+                                                    "monitor_new_pending_pools",
+                                                    format!("EVM Log had no transaction hash - strange"),
+                                                    ErrorSeverity::Warning,
+                                                ))
+                                                .await;
+
+                                            continue;
+                                        }
+                                    };
+                                    let new_pool = NewPool::new(event.Address, event.registry.to::<i32>(), event.Seller, event.IPFS, tx_hash, amount);
                                      let _ = spawner_tx.send(new_pool).await;
                                     }
                                 Err(e) => {

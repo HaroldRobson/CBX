@@ -66,7 +66,7 @@ where
                     None => {
                         let _ = error_monitoring_tx
                             .send(MonitorError::new(
-                                "monitor_seller_refund_requests",
+                                "monitor_tokens_queued",
                                 format!("EVM Log had no transaction hash - strange"),
                                 ErrorSeverity::Warning,
                             ))

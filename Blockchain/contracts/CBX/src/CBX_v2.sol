@@ -116,7 +116,7 @@ contract CBX is ERC20 {
 
     function activate() external onlyFactory {
         status = PoolStatus.ACTIVE;
-        emit poolActivated(); // way easier for our backend if this contract emits instead of having to go through factory. 
+        emit poolActivated(); 
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -310,7 +310,7 @@ contract CBX is ERC20 {
         payable(owner).transfer(msg.value);
         _burn(msg.sender, amountOfTokens);
         PendingRetirement memory retirement = PendingRetirement({tokens: amountOfTokens, user: msg.sender, timestamp: block.timestamp});
-        PendingRetirement[] memory retirementBundle2 = new PendingRetirement[]();
+        PendingRetirement[] memory retirementBundle2 = new PendingRetirement[](1);
         retirementBundle2[0] = retirement;
         bundleCounter++;
         bytes memory retirementData = abi.encode(retirementBundle2);
