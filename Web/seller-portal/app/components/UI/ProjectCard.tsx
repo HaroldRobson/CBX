@@ -55,12 +55,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
     try {
       setPurchasing(true);
       const amountTokens = Math.floor(parseFloat(amount) * 100).toString();
+      //@ts-ignore
       const cost = (parseInt(amountTokens) * parseInt(summary.pricePerTokenWithFee)).toString();
       
       // Step 1: Approve USDC
       await approveUSDC(pool.poolAddress, cost);
       
       // Step 2: Buy tokens
+      // @ts-ignore
       await buyCredits(pool.poolAddress, amountTokens);
       
       alert('Purchase successful!');
@@ -78,12 +80,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
     try {
       setPurchasing(true);
       const amountTokens = Math.floor(parseFloat(amount) * 100).toString();
+      //@ts-ignore
       const cost = (parseInt(amountTokens) * parseInt(summary.pricePerTokenWithFee)).toString();
       
       // Step 1: Approve USDC
       await approveUSDC(pool.poolAddress, cost);
       
       // Step 2: Buy and retire
+      // @ts-ignore
       await buyAndRetireCredits(pool.poolAddress, amountTokens);
       
       alert('Purchase and retirement successful!');

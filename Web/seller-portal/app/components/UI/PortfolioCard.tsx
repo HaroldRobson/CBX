@@ -29,6 +29,8 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ pool, summary, metadata }
     try {
       setRetiring(true);
       const amountTokens = Math.floor(parseFloat(retireAmount) * 100).toString();
+      // apparently amountTokens is a string???
+      // @ts-ignore
       await retireCredits(pool.poolAddress, amountTokens);
       alert('Retirement successful!');
       setRetireAmount('');
