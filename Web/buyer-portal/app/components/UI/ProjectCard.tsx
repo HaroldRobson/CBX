@@ -51,18 +51,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
 
   const handleBuyCredits = async () => {
     if (!isConnected || !summary) return;
-    
+
     try {
       setPurchasing(true);
-      const amountTokens = Math.floor(parseFloat(amount) * 100).toString();
-      const cost = (parseInt(amountTokens) * parseInt(summary.pricePerTokenWithFee)).toString();
-      
+      const amountTokens = Math.floor(parseFloat(amount) * 100);
+      const cost = (amountTokens * parseInt(summary.pricePerTokenWithFee)).toString();
+
       // Step 1: Approve USDC
       await approveUSDC(pool.poolAddress, cost);
-      
+
       // Step 2: Buy tokens
       await buyCredits(pool.poolAddress, amountTokens);
-      
+
       alert('Purchase successful!');
     } catch (error) {
       console.error('Purchase failed:', error);
@@ -74,18 +74,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
 
   const handleBuyAndRetire = async () => {
     if (!isConnected || !summary) return;
-    
+
     try {
       setPurchasing(true);
-      const amountTokens = Math.floor(parseFloat(amount) * 100).toString();
-      const cost = (parseInt(amountTokens) * parseInt(summary.pricePerTokenWithFee)).toString();
-      
+      const amountTokens = Math.floor(parseFloat(amount) * 100);
+      const cost = (amountTokens * parseInt(summary.pricePerTokenWithFee)).toString();
+
       // Step 1: Approve USDC
       await approveUSDC(pool.poolAddress, cost);
-      
+
       // Step 2: Buy and retire
       await buyAndRetireCredits(pool.poolAddress, amountTokens);
-      
+
       alert('Purchase and retirement successful!');
     } catch (error) {
       console.error('Purchase and retirement failed:', error);
@@ -125,11 +125,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
           </button>
         </div>
       </div>
-      
+
       <div className="p-6">
         <h3 className="text-xl font-semibold text-white mb-2">{metadata.name}</h3>
         <p className="text-slate-400 text-sm mb-4">Developed by {metadata.developer}</p>
-        
+
         <div className="flex items-center space-x-4 mb-4">
           <div className="flex items-center space-x-2">
             <Globe className="text-slate-400" size={14} />

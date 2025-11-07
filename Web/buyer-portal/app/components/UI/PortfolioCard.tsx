@@ -25,10 +25,10 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ pool, summary, metadata }
 
   const handleRetire = async () => {
     if (!retireAmount || retiring) return;
-    
+
     try {
       setRetiring(true);
-      const amountTokens = Math.floor(parseFloat(retireAmount) * 100).toString();
+      const amountTokens = Math.floor(parseFloat(retireAmount) * 100);
       await retireCredits(pool.poolAddress, amountTokens);
       alert('Retirement successful!');
       setRetireAmount('');
