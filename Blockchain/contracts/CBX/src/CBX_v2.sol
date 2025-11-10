@@ -225,6 +225,52 @@ contract CBX is ERC20 {
         }
     }
 
+    function buyTokensOnBehalfOf(uint256 amountOfCBXOut, address recipient) external {
+        require(status == PoolStatus.ACTIVE, "Pool is not active!");
+        // should be 100 times the tota number of credits the user wants
+        require(amountOfCBXOut <= balanceOf(address(this)), "We don't have enough carbon credits in our pool");
+        uint256 pricePerTokenWithFee = getUSDCPricePerTokenWithFee();
+        uint256 costInUSDC = amountOfCBXOut * pricePerTokenWithFee;
+        require(USDCtokens.transferFrom(msg.sender, address(this), costInUSDC), "ALERT: TRANSFER FAILED"); // this requires the customer to call (IERC20(USDC_ADDRESS)).approve(address(this), amountOfCBXOut * getPricePerTokenWithFee())
+        _transfer(address(this), recipient, amountOfCBXOut);
+        sellerProfit += costInUSDC * 1e4 / (1e4 + fee);
+        feesCollected += costInUSDC * fee / (1e4 + fee);
+        emit TokensPurchasedWithUSDC(recipient, amountOfCBXOut, costInUSDC);
+        emit reserveOfCBXChanged(balanceOf(address(this)));
+        if (balanceOf(address(this)) == 0) {
+            _closePool();
+        }
+    }
+
+    function buyAndRetireTokensOnBehalfOf(uint256 amountOfCBXOut, address recipient) external payable {
+        // should be 100 times the tota number of credits the user wants
+        require(status == PoolStatus.ACTIVE, "Pool is not active!");
+        require(amountOfCBXOut <= balanceOf(address(this)), "We don't have enough carbon credits in our pool");
+        require(pendingRetirementQueue.length < MAX_PENDING_RETIREMENTS, "Retirement queue is full, try again later");
+        require(msg.value >= RETIREMET_GAS_FEE);
+        payable(owner).transfer(msg.value); // transfer some XTZ to the owner for gas when they call processRetirements();
+        uint256 pricePerTokenWithFee = getUSDCPricePerTokenWithFee();
+        uint256 costInUSDC = amountOfCBXOut * pricePerTokenWithFee;
+        require(USDCtokens.transferFrom(msg.sender, address(this), costInUSDC), "ALERT: TRANSFER FAILED"); // this requires the customer to call (IERC20(USDC_ADDRESS)).approve(address(this), amountOfCBXOut * getPricePerTokenWithFee())
+        _burn(address(this), amountOfCBXOut);
+
+        // Add to pending queue
+        pendingRetirementQueue.push(
+            PendingRetirement({tokens: amountOfCBXOut, user: recipient, timestamp: block.timestamp})
+        );
+        emit TokensQueued(recipient, amountOfCBXOut);
+        sellerProfit += costInUSDC * 1e4 / (1e4 + fee);
+        feesCollected += costInUSDC * fee / (1e4 + fee);
+        emit TokensPurchasedWithUSDC(recipient, amountOfCBXOut, costInUSDC);
+        emit reserveOfCBXChanged(balanceOf(address(this)));
+        if (balanceOf(address(this)) == 0) {
+            _closePool();
+        }
+    }
+
+
+
+
     function sellerTransfer(address recipient, uint256 amount) public onlySeller {
         _transfer(address(this), recipient, amount);
     }
