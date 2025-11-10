@@ -1,3 +1,4 @@
+// factory_v2.sol
 export interface Pool {
   status: number;
   poolAddress: string;
@@ -9,6 +10,7 @@ export interface Pool {
   registry: number;
 }
 
+// cbx_v2.sol
 export interface PoolSummary {
   name: string;
   symbol: string;
@@ -21,9 +23,10 @@ export interface PoolSummary {
   owner: string;
   status: number;
   feeBps: string;
-  userBalance: string;
+  userBalance: string; // TODO: Change type
 }
 
+// IPFS
 export interface ProjectMetadata {
   name: string;
   developer: string;
@@ -34,6 +37,7 @@ export interface ProjectMetadata {
   imageUrl: string;
 }
 
+// NFT_v2.sol
 export interface RetirementReceipt {
   id: string;
   projectName: string;

@@ -22,6 +22,7 @@ export const useWeb3 = () => {
     isConnecting: false,
   });
 
+  // MARK: TODO – Rewrite for Transak One
   const connectWallet = async () => {
     if (typeof window === 'undefined' || !window.ethereum) {
       alert('Please install MetaMask!');
@@ -30,14 +31,14 @@ export const useWeb3 = () => {
 
     try {
       setWeb3State(prev => ({ ...prev, isConnecting: true }));
-      
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
-      
+
       const signer = await provider.getSigner();
       const account = await signer.getAddress();
       const network = await provider.getNetwork();
-      
+
       setWeb3State({
         provider,
         signer,
@@ -74,7 +75,7 @@ export const useWeb3 = () => {
             const signer = await provider.getSigner();
             const account = await signer.getAddress();
             const network = await provider.getNetwork();
-            
+
             setWeb3State({
               provider,
               signer,
