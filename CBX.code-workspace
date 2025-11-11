@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"name": "CBX (Root)",
+			"path": "."
+		},
+		{
+			"name": "Landing Page",
+			"path": "Web/landing-page/next-application"
+		},
+		{
+			"name": "Buyer Portal",
+			"path": "Web/buyer-portal"
+		},
+		{
+			"name": "Seller Portal",
+			"path": "Web/seller-portal"
+		},
+		{
+			"name": "Shared",
+			"path": "Web/shared"
+		}
+	],
+	"settings": {}
+}

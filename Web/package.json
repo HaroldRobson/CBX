@@ -1,0 +1,15 @@
+{
+  "name": "cbx-web",
+  "version": "0.1.0",
+  "scripts": {
+    "install": "yarn landing! --immutable && yarn buyer! --immutable && yarn seller! --immutable",
+    "landing!": "yarn --cwd landing-page/next-application",
+    "buyer!": "yarn --cwd buyer-portal",
+    "seller!": "yarn --cwd seller-portal"
+  },
+  "workspaces": [
+    "buyer-portal",
+    "seller-portal",
+    "landing-page/next-application"
+  ]
+}
