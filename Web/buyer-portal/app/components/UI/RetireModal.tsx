@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import { useContracts } from '../../hooks/useContracts';
+import { useContracts } from 'cbx/hooks/useContracts';
 
 interface RetireModalProps {
   isOpen: boolean;

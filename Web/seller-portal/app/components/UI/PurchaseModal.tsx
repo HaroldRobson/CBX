@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import { useContracts } from '../../hooks/useContracts';
+import { useContracts } from 'cbx/hooks/useContracts';
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -23,13 +23,13 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   availableCredits,
   mode
 }) => {
-  const { 
-    calculatePurchaseCost, 
-    approveUSDC, 
-    buyCredits, 
+  const {
+    calculatePurchaseCost,
+    approveUSDC,
+    buyCredits,
     buyAndRetireCredits,
     checkUSDCAllowance,
-    getUSDCBalance 
+    getUSDCBalance
   } = useContracts();
 
   const [amount, setAmount] = useState('');
@@ -64,7 +64,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
       const calculateCostDebounced = setTimeout(() => {
         calculateCost();
       }, 300); // Debounce to prevent too many calculations
-      
+
       return () => clearTimeout(calculateCostDebounced);
     } else {
       setCostData(null);
@@ -133,7 +133,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
       } else {
         receipt = await buyAndRetireCredits(poolAddress, Number(amount));
       }
-      
+
       setTxHash(receipt.hash);
       setStep('success');
     } catch (error: any) {
@@ -165,7 +165,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
     const balanceLimit = Number(usdcBalance) / pricePerCredit;
     return Math.min(availableCredits, balanceLimit);
   };
-  
+
   const maxAmount = getMaxAmount();
 
   return (
@@ -256,7 +256,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                   First, you need to approve the contract to spend your USDC tokens.
                 </p>
               </div>
-              
+
               <button
                 onClick={handleApprove}
                 disabled={loading}
@@ -287,7 +287,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                   Now complete your {mode === 'buy' ? 'purchase' : 'purchase and retirement'}.
                 </p>
               </div>
-              
+
               <button
                 onClick={handlePurchase}
                 disabled={loading}

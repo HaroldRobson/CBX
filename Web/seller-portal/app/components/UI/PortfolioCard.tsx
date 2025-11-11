@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useContracts } from '../../hooks/useContracts';
-import type { Pool, PoolSummary, ProjectMetadata } from '../../types';
+import { useContracts } from 'cbx/hooks/useContracts';
+import type { Pool, PoolSummary, ProjectMetadata } from 'cbx/types';
 
 interface PortfolioCardProps {
   pool: Pool;
@@ -25,7 +25,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ pool, summary, metadata }
 
   const handleRetire = async () => {
     if (!retireAmount || retiring) return;
-    
+
     try {
       setRetiring(true);
       const amountTokens = Math.floor(parseFloat(retireAmount) * 100).toString();
