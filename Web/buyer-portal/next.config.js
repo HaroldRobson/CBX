@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  swcMinify: false,
   images: {
     domains: ['images.pexels.com'],
-  }
+  },
+  transpilePackages: ['cbx']
 }
 
 module.exports = nextConfig

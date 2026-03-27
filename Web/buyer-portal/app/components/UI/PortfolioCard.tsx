@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useContracts } from '../../hooks/useContracts';
-import type { Pool, PoolSummary, ProjectMetadata } from '../../types';
+import { useContracts } from 'cbx/hooks/useContracts';
+import type { Pool, PoolSummary, ProjectMetadata } from 'cbx/types';
 
 interface PortfolioCardProps {
   pool: Pool;

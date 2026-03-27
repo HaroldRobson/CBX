@@ -3,7 +3,7 @@
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Download, Share2, ExternalLink, CheckCircle, Info, Shield } from 'lucide-react';
-import { mockNFTCertificate } from '../utils/mockData';
+import { mockNFTCertificate } from 'cbx/utils/mockData';
 
 const NFTCertificate: React.FC = () => {
   const params = useParams();
@@ -97,7 +97,7 @@ const NFTCertificate: React.FC = () => {
                 <Shield className="text-purple-400" size={20} />
                 <h3 className="text-lg font-semibold text-white">Blockchain Verification</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-slate-400 text-sm mb-2">Transaction Hash</p>
@@ -124,7 +124,7 @@ const NFTCertificate: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-semibold text-white">Permanent Storage</h3>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm mb-2">IPFS Link</p>

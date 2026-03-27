@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Info, Globe, Star } from 'lucide-react';
-import { useContracts } from '../../hooks/useContracts';
-import { useWeb3 } from '../../hooks/useWeb3';
-import type { Pool, PoolSummary, ProjectMetadata } from '../../types';
-import { mockProjectMetadata } from '../../utils/mockData';
+import { useContracts } from 'cbx/hooks/useContracts';
+import { useWeb3 } from 'cbx/hooks/useWeb3';
+import type { Pool, PoolSummary, ProjectMetadata } from 'cbx/types';
+import { mockProjectMetadata } from 'cbx/utils/mockData';
 
 interface ProjectCardProps {
   pool: Pool;

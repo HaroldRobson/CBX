@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronDown, Globe, Star, Info } from 'lucide-react';
-import { useContracts } from '../hooks/useContracts';
-import { useWeb3 } from '../hooks/useWeb3';
+import { useContracts } from 'cbx/hooks/useContracts';
+import { useWeb3 } from 'cbx/hooks/useWeb3';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import PurchaseModal from '../components/UI/PurchaseModal';
-import type { Pool } from '../types';
+import type { Pool } from 'cbx/types';
 
 interface TransformedPoolData {
   pool: Pool;
@@ -56,7 +56,7 @@ const BuyCredits: React.FC = () => {
       console.log('Fetched active pools:', activePools);
 
       const transformedPools: TransformedPoolData[] = [];
-      
+
       for (const pool of activePools) {
         try {
           const transformedData = await transformPoolData(pool);
@@ -83,15 +83,15 @@ const BuyCredits: React.FC = () => {
   }, []); // Only run once on mount
 
   const filteredProjects = pools.filter(project => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       project.metadata.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.metadata.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.metadata.developer.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRegistry = registryFilter === '' || 
+
+    const matchesRegistry = registryFilter === '' ||
       project.metadata.registry.toLowerCase() === registryFilter.toLowerCase();
-    
-    const matchesCountry = countryFilter === '' || 
+
+    const matchesCountry = countryFilter === '' ||
       project.metadata.country.toLowerCase() === countryFilter.toLowerCase();
 
     return matchesSearch && matchesRegistry && matchesCountry;
@@ -113,13 +113,13 @@ const BuyCredits: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col" style={{backgroundColor: '#111827'}}>
+    <div className="h-full flex flex-col" style={{ backgroundColor: '#111827' }}>
       {/* Fixed Header Section */}
       <div className="flex-shrink-0 p-8 pb-0">
         <h1 className="text-3xl font-bold text-white mb-8">Buy Carbon Credits</h1>
-        
+
         {/* Search and Filters Container */}
-        <div className="rounded-xl p-6 border border-slate-700 mb-8" style={{backgroundColor: '#111827'}}>
+        <div className="rounded-xl p-6 border border-slate-700 mb-8" style={{ backgroundColor: '#111827' }}>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -136,14 +136,16 @@ const BuyCredits: React.FC = () => {
                 }}
               />
             </div>
-            
+
             <div className="relative">
               <select
                 value={registryFilter}
                 onChange={(e) => setRegistryFilter(e.target.value)}
                 className="appearance-none border border-slate-600 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none cursor-pointer transition-colors min-w-[200px]"
-                style={{backgroundColor: '#374151',
-                  borderColor: registryFilter ? '#2ed37d' : '', boxShadow: registryFilter ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : ''}}
+                style={{
+                  backgroundColor: '#374151',
+                  borderColor: registryFilter ? '#2ed37d' : '', boxShadow: registryFilter ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : ''
+                }}
               >
                 <option value="">Filter by Registry</option>
                 <option value="verra">Verra</option>
@@ -151,14 +153,16 @@ const BuyCredits: React.FC = () => {
               </select>
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
             </div>
-            
+
             <div className="relative">
               <select
                 value={countryFilter}
                 onChange={(e) => setCountryFilter(e.target.value)}
                 className="appearance-none border border-slate-600 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none cursor-pointer transition-colors min-w-[200px]"
-                style={{backgroundColor: '#374151',
-                  borderColor: countryFilter ? '#2ed37d' : '', boxShadow: countryFilter ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : ''}}
+                style={{
+                  backgroundColor: '#374151',
+                  borderColor: countryFilter ? '#2ed37d' : '', boxShadow: countryFilter ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : ''
+                }}
               >
                 <option value="">Filter by Country</option>
                 <option value="ghana">Ghana</option>
@@ -181,7 +185,7 @@ const BuyCredits: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project, index) => (
-              <div key={project.pool.poolAddress} className="rounded-xl overflow-hidden border border-slate-700 hover:border-slate-600 transition-all duration-200 shadow-lg" style={{backgroundColor: '#1F2937'}}>
+              <div key={project.pool.poolAddress} className="rounded-xl overflow-hidden border border-slate-700 hover:border-slate-600 transition-all duration-200 shadow-lg" style={{ backgroundColor: '#1F2937' }}>
                 <div className="relative">
                   <img
                     src={project.metadata.imageUrl}
@@ -197,11 +201,11 @@ const BuyCredits: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-white mb-2">{project.metadata.name}</h3>
                   <p className="text-slate-400 text-sm mb-4">Developed by {project.metadata.developer}</p>
-                  
+
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="flex items-center space-x-2">
                       <Globe className="text-slate-400" size={14} />
@@ -220,7 +224,7 @@ const BuyCredits: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Price/Credit</p>
-                      <p className="font-medium" style={{color: '#2ed37d'}}>${project.pricePerCreditUSD.toFixed(2)} USDC</p>
+                      <p className="font-medium" style={{ color: '#2ed37d' }}>${project.pricePerCreditUSD.toFixed(2)} USDC</p>
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Available</p>
@@ -233,14 +237,14 @@ const BuyCredits: React.FC = () => {
                   </div>
 
                   <div className="flex space-x-3">
-                    <button 
+                    <button
                       onClick={() => openPurchaseModal(project, 'buy')}
-                      className="flex-1 text-black py-2.5 px-4 rounded-lg hover:opacity-90 transition-all duration-200 font-medium" 
-                      style={{backgroundColor: '#2ed37d'}}
+                      className="flex-1 text-black py-2.5 px-4 rounded-lg hover:opacity-90 transition-all duration-200 font-medium"
+                      style={{ backgroundColor: '#2ed37d' }}
                     >
                       Buy Credits
                     </button>
-                    <button 
+                    <button
                       onClick={() => openPurchaseModal(project, 'buyAndRetire')}
                       className="flex-1 bg-slate-600 text-white px-4 py-2.5 rounded-lg hover:bg-slate-500 transition-all font-medium text-sm"
                     >
@@ -257,7 +261,7 @@ const BuyCredits: React.FC = () => {
           <div className="text-center py-16">
             <h3 className="text-xl font-semibold text-white mb-2">No Active Pools Found</h3>
             <p className="text-slate-400">
-              {pools.length === 0 
+              {pools.length === 0
                 ? "There are currently no active carbon credit pools available."
                 : "No pools match your current filters. Try adjusting your search criteria."
               }

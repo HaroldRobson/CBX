@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ChevronDown, Award } from 'lucide-react';
-import { mockRetirementReceipts } from '../utils/mockData';
+import { mockRetirementReceipts } from 'cbx/utils/mockData';
 
 const ViewReceipts: React.FC = () => {
   const router = useRouter();
@@ -83,7 +83,7 @@ const ViewReceipts: React.FC = () => {
     <div className="p-8 bg-slate-900 min-h-full">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-8">View Receipts</h1>
-        
+
         {/* Search and Filters Container */}
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
@@ -97,7 +97,7 @@ const ViewReceipts: React.FC = () => {
                 className="w-full bg-slate-700 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
-            
+
             <div className="relative">
               <select
                 value={statusFilter}
@@ -110,7 +110,7 @@ const ViewReceipts: React.FC = () => {
               </select>
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
             </div>
-            
+
             <div className="relative">
               <select
                 value={dateSort}
@@ -138,11 +138,10 @@ const ViewReceipts: React.FC = () => {
               />
               {/* Status Badge */}
               <div className="absolute top-3 right-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  receipt.status === 'Complete' 
-                    ? 'bg-emerald-600 text-white' 
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${receipt.status === 'Complete'
+                    ? 'bg-emerald-600 text-white'
                     : 'bg-yellow-600 text-white'
-                }`}>
+                  }`}>
                   {receipt.status}
                 </span>
               </div>

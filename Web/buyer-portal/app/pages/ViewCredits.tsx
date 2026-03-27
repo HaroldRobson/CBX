@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
-import { useContracts } from '../hooks/useContracts';
-import { useWeb3 } from '../hooks/useWeb3';
+import { useContracts } from 'cbx/hooks/useContracts';
+import { useWeb3 } from 'cbx/hooks/useWeb3';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import RetireModal from '../components/UI/RetireModal';
 import PurchaseModal from '../components/UI/PurchaseModal';
-import type { Pool, PoolSummary } from '../types';
+import type { Pool, PoolSummary } from 'cbx/types';
 import { useRouter } from 'next/navigation';
 
 interface PortfolioItem {
@@ -70,7 +70,7 @@ const ViewCredits: React.FC = () => {
       setLoading(true);
       const portfolio = await getUserPortfolio();
       console.log('Fetched user portfolio:', portfolio);
-      
+
       setPortfolioItems(portfolio);
       const total = portfolio.reduce((sum: number, item: PortfolioItem) => sum + item.userOwnedCredits, 0);
       setTotalCredits(total);
@@ -88,12 +88,12 @@ const ViewCredits: React.FC = () => {
   }, []); // Only run once on mount
 
   const filteredPortfolio = portfolioItems.filter(item => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       item.metadata.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.metadata.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.metadata.developer.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'All' || 
+
+    const matchesStatus = statusFilter === 'All' ||
       (statusFilter === 'Active' && item.userOwnedCredits > 0) ||
       (statusFilter === 'Retired' && item.userOwnedCredits === 0);
 
@@ -147,20 +147,20 @@ const ViewCredits: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col" style={{backgroundColor: '#111827'}}>
+    <div className="h-full flex flex-col" style={{ backgroundColor: '#111827' }}>
       {/* Fixed Header Section */}
       <div className="flex-shrink-0 p-8 pb-0">
         <h1 className="text-3xl font-bold text-white mb-8">View Credits</h1>
-        
+
         {/* Portfolio Summary */}
-        <div className="rounded-xl p-6 border border-slate-700 shadow-lg mb-8" style={{backgroundColor: '#1F2937'}}>
+        <div className="rounded-xl p-6 border border-slate-700 shadow-lg mb-8" style={{ backgroundColor: '#1F2937' }}>
           <h2 className="text-xl font-semibold text-white mb-4">Your Carbon Credit Portfolio</h2>
           <p className="text-slate-400 mb-6">Manage and retire your owned carbon credits from verified projects</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="text-center md:text-left">
               <p className="text-slate-400 text-sm mb-1">Total Credits Owned</p>
-              <p className="text-3xl font-bold" style={{color: '#2ed37d'}}>{totalCredits.toFixed(1)} Tonnes</p>
+              <p className="text-3xl font-bold" style={{ color: '#2ed37d' }}>{totalCredits.toFixed(1)} Tonnes</p>
             </div>
             <div className="text-center md:text-right">
               <p className="text-slate-400 text-sm mb-1">Retired Credits</p>
@@ -170,7 +170,7 @@ const ViewCredits: React.FC = () => {
         </div>
 
         {/* Search and Filters Container */}
-        <div className="rounded-xl p-6 border border-slate-700 mb-8" style={{backgroundColor: '#1F2937'}}>
+        <div className="rounded-xl p-6 border border-slate-700 mb-8" style={{ backgroundColor: '#1F2937' }}>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -180,16 +180,16 @@ const ViewCredits: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-slate-700 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-400 focus:outline-none transition-colors"
-                style={{borderColor: searchTerm ? '#2ed37d' : '', boxShadow: searchTerm ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : ''}}
+                style={{ borderColor: searchTerm ? '#2ed37d' : '', boxShadow: searchTerm ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : '' }}
               />
             </div>
-            
+
             <div className="relative">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="appearance-none bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none cursor-pointer transition-colors min-w-[150px]"
-                style={{borderColor: statusFilter !== 'All' ? '#2ed37d' : '', boxShadow: statusFilter !== 'All' ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : ''}}
+                style={{ borderColor: statusFilter !== 'All' ? '#2ed37d' : '', boxShadow: statusFilter !== 'All' ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : '' }}
               >
                 <option value="All">Status: All</option>
                 <option value="Active">Active</option>
@@ -197,13 +197,13 @@ const ViewCredits: React.FC = () => {
               </select>
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
             </div>
-            
+
             <div className="relative">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="appearance-none bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none cursor-pointer transition-colors min-w-[170px]"
-                style={{borderColor: sortBy !== 'Recent' ? '#2ed37d' : '', boxShadow: sortBy !== 'Recent' ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : ''}}
+                style={{ borderColor: sortBy !== 'Recent' ? '#2ed37d' : '', boxShadow: sortBy !== 'Recent' ? '0 0 0 3px rgba(46, 211, 125, 0.1)' : '' }}
               >
                 <option value="Recent">Sort By: Recent</option>
                 <option value="Amount">Amount</option>
@@ -222,7 +222,7 @@ const ViewCredits: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedPortfolio.map((item, index) => (
-              <div key={item.pool.poolAddress} className="rounded-xl overflow-hidden border border-slate-700 shadow-lg hover:shadow-xl transition-shadow duration-300" style={{backgroundColor: '#1F2937'}}>
+              <div key={item.pool.poolAddress} className="rounded-xl overflow-hidden border border-slate-700 shadow-lg hover:shadow-xl transition-shadow duration-300" style={{ backgroundColor: '#1F2937' }}>
                 {/* Project Image */}
                 <div className="relative h-48 overflow-hidden">
                   <img
@@ -235,7 +235,7 @@ const ViewCredits: React.FC = () => {
                   />
                   {/* Status Badge */}
                   <div className="absolute top-3 right-3">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium text-white" style={{backgroundColor: '#2ed37d'}}>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: '#2ed37d' }}>
                       Active
                     </span>
                   </div>
@@ -245,7 +245,7 @@ const ViewCredits: React.FC = () => {
                 <div className="p-6">
                   <h3 className="text-lg font-semibold text-white mb-1">{item.metadata.name}</h3>
                   <p className="text-slate-400 text-sm mb-4">Developed by {item.metadata.developer}</p>
-                  
+
                   <div className="flex items-center space-x-4 mb-4 text-sm">
                     <div className="flex items-center space-x-1">
                       <span className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
@@ -254,7 +254,7 @@ const ViewCredits: React.FC = () => {
                       <span className="text-slate-300">{item.metadata.country}</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <span className="w-4 h-4 rounded-full flex items-center justify-center" style={{backgroundColor: '#2ed37d'}}>
+                      <span className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2ed37d' }}>
                         <span className="text-xs">✓</span>
                       </span>
                       <span className="text-slate-300">{item.metadata.registry}</span>
@@ -272,7 +272,7 @@ const ViewCredits: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-slate-400">Amount Owned</p>
-                      <p className="font-medium" style={{color: '#2ed37d'}}>{item.userOwnedCredits.toFixed(1)} Tonnes</p>
+                      <p className="font-medium" style={{ color: '#2ed37d' }}>{item.userOwnedCredits.toFixed(1)} Tonnes</p>
                     </div>
                     <div>
                       <p className="text-slate-400">Current Value</p>
@@ -282,14 +282,14 @@ const ViewCredits: React.FC = () => {
 
                   {/* Action Buttons */}
                   <div className="flex space-x-3">
-                    <button 
+                    <button
                       onClick={() => openPurchaseModal(item)}
-                      className="flex-1 text-black px-4 py-2 rounded-lg hover:opacity-90 transition-colors font-medium text-sm" 
-                      style={{backgroundColor: '#2ed37d'}}
+                      className="flex-1 text-black px-4 py-2 rounded-lg hover:opacity-90 transition-colors font-medium text-sm"
+                      style={{ backgroundColor: '#2ed37d' }}
                     >
                       Buy More
                     </button>
-                    <button 
+                    <button
                       onClick={() => openRetireModal(item)}
                       disabled={item.userOwnedCredits === 0}
                       className="flex-1 bg-slate-600 text-white px-4 py-2 rounded-lg hover:bg-slate-500 disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors font-medium text-sm"
@@ -307,15 +307,15 @@ const ViewCredits: React.FC = () => {
           <div className="text-center py-16">
             <h3 className="text-xl font-semibold text-white mb-2">No Credits Found</h3>
             <p className="text-slate-400 mb-4">
-              {portfolioItems.length === 0 
+              {portfolioItems.length === 0
                 ? "You don't own any carbon credits yet."
                 : "No credits match your current filters."
               }
             </p>
-            <button 
+            <button
               onClick={() => router.push('/')}
-              className="text-white px-6 py-2 rounded-lg hover:opacity-90 transition-colors" 
-              style={{backgroundColor: '#2ed37d'}}
+              className="text-white px-6 py-2 rounded-lg hover:opacity-90 transition-colors"
+              style={{ backgroundColor: '#2ed37d' }}
             >
               Browse Credits
             </button>

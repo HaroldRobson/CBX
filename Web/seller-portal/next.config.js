@@ -7,6 +7,7 @@ const nextConfig = {
   env: {
     PORTAL_TYPE: 'seller',
   },
+  transpilePackages: ['cbx']
 }
 
 module.exports = nextConfig 
